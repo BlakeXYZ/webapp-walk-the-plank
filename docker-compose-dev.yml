@@ -1,0 +1,79 @@
+x-build-args: &build_args
+  INSTALL_PYTHON_VERSION: "3.13"
+  INSTALL_NODE_VERSION: "22"
+
+x-default-volumes: &default_volumes
+  volumes:
+    - ./:/app
+    - node-modules:/app/node_modules
+
+services:
+  db-dev:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+
+  flask-dev:
+    build:
+      context: .
+      target: development
+      args:
+        <<: *build_args
+    image: "my_flask_app-development"
+    ports:
+      - "8080:5000"
+      - "2992:2992"
+    environment:
+      FLASK_ENV: development
+      FLASK_DEBUG: 1
+      DATABASE_URL: postgresql://postgres:password@db-dev:5432/app
+    depends_on:
+      - db-dev
+    <<: *default_volumes
+
+  pgadmin-dev:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "8081:80"
+    networks:
+      - default
+    depends_on:
+      - flask-dev
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+
+  # manage service for running Flask commands
+  # can find commands in commands.py
+  # e.g. test or lint functions
+  # command line compose example:
+  ####cmd: docker-compose run --rm manage test
+  ####cmd: docker-compose run --rm manage lint
+  manage:
+    build:
+      context: .
+      target: development
+      args:
+        <<: *build_args
+    entrypoint: flask
+    environment:
+      FLASK_ENV: development
+      FLASK_DEBUG: 0
+    image: "my_flask_app-manage"
+    stdin_open: true
+    tty: true
+    <<: *default_volumes
+
+volumes:
+  node-modules:
+  pgadmin-data:
+  pg-data:

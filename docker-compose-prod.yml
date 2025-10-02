@@ -1,0 +1,108 @@
+services:
+  #TODO: explore logging for traefik 
+  traefik:
+    image: traefik:v3.1
+    command:
+      - "--providers.docker"
+      - "--providers.docker.exposedbydefault=false"
+      - "--certificatesresolvers.myresolver.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory" #TODO: use for testing, toggle OFF for final production deployment, and run docker volume rm ham-stack-deploy_letsencrypt
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=blakexyz@proton.me"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--entrypoints.web.address=:80"
+      - "--entryPoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+    ports:
+      - mode: host
+        protocol: tcp
+        published: 80
+        target: 80
+      - mode: host
+        protocol: tcp
+        published: 443
+        target: 443
+    volumes:
+      - letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - webnet
+
+  web:
+    image: ghcr.io/blakexyz/<my_flask_app-ghcr_image_name>:${GIT_COMMIT_HASH:-latest}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.web.loadbalancer.server.port=5000"
+      - "traefik.http.routers.web.rule=Host(`<my_flask_app.com>`)"
+      - "traefik.http.routers.web.entrypoints=websecure"
+      - "traefik.http.routers.web.tls.certresolver=myresolver"
+    networks: 
+      - webnet
+    secrets:
+      - db-password
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=app
+      - POSTGRES_PORT=5432
+      - POSTGRES_SSLMODE=disable
+      - FLASK_ENV=production
+      - SECRET_KEY=your-very-secret-key
+      - SEND_FILE_MAX_AGE_DEFAULT=31556926
+      - BCRYPT_LOG_ROUNDS=13
+      - FLASK_DEBUG=0
+      - LOG_LEVEL=info
+      - GUNICORN_WORKERS=4
+    deploy:
+      update_config:
+        order: start-first
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    user: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - webnet
+    secrets:
+      - db-password
+    environment:
+      - POSTGRES_DB=app
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # #connect to: http://{ip_address}:8081
+  # to remove, run: - docker service rm ham-stack-deploy_pgadmin
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   environment:
+  #     - PGADMIN_DEFAULT_EMAIL=artificialblakek@gmail.com
+  #   secrets:
+  #     - pgadmin-password
+  #   entrypoint: ["/bin/sh", "-c", "export PGADMIN_DEFAULT_PASSWORD=$$(cat /run/secrets/pgadmin-password) && exec /entrypoint.sh"]
+  #   depends_on:
+  #     - web
+  #   ports:
+  #     - "8081:80"
+  #   networks:
+  #     - webnet
+
+volumes:
+  db-data:
+  letsencrypt:
+
+secrets:
+  db-password:
+    external: true
+  pgadmin-password:
+    external: true
+
+networks:
+  webnet:
