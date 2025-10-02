@@ -49,10 +49,10 @@ env/
 /node_modules/
 
 # webpack-built files
-/my_flask_app/static/build/
+/webapp_hamburg_vs_hotdog/static/build/
 
 # Configuration
-.env
+.env.example 
 
 # Development database
 *.db

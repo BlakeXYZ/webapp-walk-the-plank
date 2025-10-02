@@ -21,7 +21,7 @@ RUN npm install
 COPY webpack.config.js autoapp.py ./
 COPY my_flask_app my_flask_app
 COPY assets assets
-COPY .env .env
+COPY .env* ./
 RUN npm run-script build
 
 # ================================= PRODUCTION =================================
