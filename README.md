@@ -11,7 +11,7 @@ Webapp for playing the Social Deduction Game, <em>Walk the Plank!</em>
 </h3>
 
 <h4 align="center">
-A party game of bluffing and deduction! Suss out who is the ill among you and have them <em>Walk the Plank!</em> Inspired by Among Us, Werefolf, Spyfall, and The Chameleon.
+A party game of bluffing and deduction! Suss out who is the ill among you and have them <em>Walk the Plank!</em> <br>Inspired by Among Us, Wereolf, Spyfall, and The Chameleon.
 </h4>
 
 
