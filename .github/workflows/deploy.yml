@@ -49,33 +49,33 @@ jobs:
           push: true
           target: production
           tags: |
-            ghcr.io/blakexyz/<my_flask_app-ghcr_image_name>:latest
-            ghcr.io/blakexyz/<my_flask_app-ghcr_image_name>:${{ github.sha }}
+            ghcr.io/blakexyz/webapp-walk-the-plank-ghcr:latest
+            ghcr.io/blakexyz/webapp-walk-the-plank-ghcr:${{ github.sha }}
 
-  deploy:
-    if: "contains(github.event.head_commit.message, '[deploy]')"
-    runs-on: ubuntu-latest
-    needs:
-      - build-and-push-image
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+  # deploy:
+  #   if: "contains(github.event.head_commit.message, '[deploy]')"
+  #   runs-on: ubuntu-latest
+  #   needs:
+  #     - build-and-push-image
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
 
-    - name: create env file
-      run: |
-        echo "GIT_COMMIT_HASH=${{ github.sha }}" >> ./envfile
+  #   - name: create env file
+  #     run: |
+  #       echo "GIT_COMMIT_HASH=${{ github.sha }}" >> ./envfile
 
-    - name: Docker Stack Deploy
-      uses: cssnr/stack-deploy-action@v1
-      with:
-        name: my_flask_app-deploy
-        file: docker-compose-prod.yml
-        host: <my_flask_app-your-domain.com>
-        user: deploy
-        ssh_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
-        env_file: ./envfile
-        registry_auth: true
-        # view info on ubuntu cli with:
-        #   docker stack ls
-        #   docker service ls
-        #   docker service ps ham-test-gitactions-test_web  --no-trunc 
+  #   - name: Docker Stack Deploy
+  #     uses: cssnr/stack-deploy-action@v1
+  #     with:
+  #       name: my_flask_app-deploy
+  #       file: docker-compose-prod.yml
+  #       host: <my_flask_app-your-domain.com>
+  #       user: deploy
+  #       ssh_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+  #       env_file: ./envfile
+  #       registry_auth: true
+  #       # view info on ubuntu cli with:
+  #       #   docker stack ls
+  #       #   docker service ls
+  #       #   docker service ps ham-test-gitactions-test_web  --no-trunc 
