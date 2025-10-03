@@ -77,3 +77,5 @@ secrets:
 
 networks:
   webnet:
+    external: true # References the shared network created by the Traefik stack
+    name: traefik-deploy_webnet  # {stack name}_{network name}
