@@ -3,10 +3,10 @@ services:
     image: ghcr.io/blakexyz/webapp-walk-the-plank-ghcr:${GIT_COMMIT_HASH:-latest}
     labels:
       - "traefik.enable=true"
-      - "traefik.http.services.web.loadbalancer.server.port=5000"
-      - "traefik.http.routers.web.rule=Host(`walktheplank.app`)"
-      - "traefik.http.routers.web.entrypoints=websecure"
-      - "traefik.http.routers.web.tls.certresolver=myresolver"
+      - "traefik.http.services.plank-web.loadbalancer.server.port=5000"
+      - "traefik.http.routers.plank-web.rule=Host(`walktheplank.app`)"
+      - "traefik.http.routers.plank-web.entrypoints=websecure"
+      - "traefik.http.routers.plank-web.tls.certresolver=myresolver"
     networks: 
       - webnet
     secrets:
