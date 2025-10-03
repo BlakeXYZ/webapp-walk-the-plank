@@ -67,7 +67,6 @@ services:
 
 volumes:
   plank-db-data:
-  letsencrypt:
 
 secrets:
   plank-db-password:
