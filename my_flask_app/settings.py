@@ -25,6 +25,12 @@ CACHE_TYPE = (
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # Ensure SQLAlchemy checks DB connection liveness (prevents 500 errors after idle)
+# Ensure SQLAlchemy checks DB connection liveness (prevents 500 errors after idle)
 SQLALCHEMY_ENGINE_OPTIONS = {
-    "pool_pre_ping": True
+    "pool_pre_ping": True,           # Test connections before use
+    "pool_recycle": 300,             # Recycle connections every 5 minutes
+    "pool_timeout": 20,              # Timeout for getting connection
+    "pool_size": 5,                  # Smaller pool size (default 5)
+    "max_overflow": 10,              # Maximum overflow connections
+    "pool_reset_on_return": "commit" # Reset connections when returned to pool
 }
