@@ -30,7 +30,7 @@ services:
     secrets:
       - plank-db-password
     environment:
-      - POSTGRES_HOST=db
+      - POSTGRES_HOST=plank-stack_db
       - POSTGRES_PASSWORD_FILE=/run/secrets/plank-db-password
       - POSTGRES_USER=postgres
       - POSTGRES_DB=plank-app
