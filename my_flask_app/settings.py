@@ -23,3 +23,8 @@ CACHE_TYPE = (
     "flask_caching.backends.SimpleCache"  # Can be "MemcachedCache", "RedisCache", etc.
 )
 SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+# Ensure SQLAlchemy checks DB connection liveness (prevents 500 errors after idle)
+SQLALCHEMY_ENGINE_OPTIONS = {
+    "pool_pre_ping": True
+}
