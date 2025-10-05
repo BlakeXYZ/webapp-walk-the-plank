@@ -9,7 +9,7 @@ services:
     secrets:
       - plank-db-password
     environment:
-      - POSTGRES_DB=app
+      - POSTGRES_DB=plank-app
       - POSTGRES_PASSWORD_FILE=/run/secrets/plank-db-password
     healthcheck:
       test: [ "CMD", "pg_isready" ]
