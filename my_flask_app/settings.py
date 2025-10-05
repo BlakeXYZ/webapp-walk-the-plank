@@ -7,6 +7,7 @@ For local development, use a .env file to set
 environment variables.
 """
 import os
+
 from environs import Env
 
 env = Env()
