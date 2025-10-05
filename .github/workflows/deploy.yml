@@ -68,7 +68,7 @@ jobs:
     - name: Docker Stack Deploy
       uses: cssnr/stack-deploy-action@v1
       with:
-        name: walk-the-plank-stack-deploy
+        name: plank-stack
         file: docker-compose-prod.yml
         host: walktheplank.app
         user: deploy
