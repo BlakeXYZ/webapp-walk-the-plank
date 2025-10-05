@@ -9,7 +9,7 @@ services:
     secrets:
       - plank-db-password
     environment:
-      - POSTGRES_DB=plankapp
+      - POSTGRES_DB=app
       - POSTGRES_PASSWORD_FILE=/run/secrets/plank-db-password
     healthcheck:
       test: [ "CMD", "pg_isready" ]
@@ -33,7 +33,7 @@ services:
       - POSTGRES_HOST=plank-stack_db
       - POSTGRES_PASSWORD_FILE=/run/secrets/plank-db-password
       - POSTGRES_USER=postgres
-      - POSTGRES_DB=plankapp
+      - POSTGRES_DB=app
       - POSTGRES_PORT=5432
       - POSTGRES_SSLMODE=disable
       - FLASK_ENV=production
