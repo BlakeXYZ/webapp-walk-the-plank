@@ -71,7 +71,7 @@ module.exports = {
       { test: /\.html$/, type: 'asset/source' },
       { test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/, type: 'asset/resource', mimetype: 'application/font-woff' },
       {
-        test: /\.(ttf|eot|svg|png|jpe?g|gif|ico)(\?.*)?$/i,
+        test: /\.(ttf|eot|svg|png|jpe?g|gif|ico|webp)(\?.*)?$/i,
         type: 'asset/resource',
         generator: {
           filename: '[name][ext]'

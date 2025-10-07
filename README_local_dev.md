@@ -35,7 +35,8 @@ Download Microsoft's extension: Container Tools
 ---
 ### How to push webpack js changes in local dev env
 ### in powershell run:
-npm run build:win3 
+### (requires to run 'npm install' in ps first)
+npm run build:win32
 
 
 ---
