@@ -1,14 +1,15 @@
-<footer>
-  <small>
-  <ul class="company">
-    <li>© BlakeXYZ</li>
-  </ul>
+<footer  style="margin-bottom: 90px;">
+  <div class="container footer-flex">
+      
+      <ul class="company">
+        <li>© BlakeXYZ</li>
+      </ul>
 
-    <ul class="footer-nav">
+      <ul class="footer-nav">
+        <li><a href="{{ url_for('public.home') }}">Home</a></li>
+        <li><a href="{{ url_for('public.about') }}">About</a></li>
+        <li><a href="https://github.com/BlakeXYZ/webapp-walk-the-plank/">Github</a></li>
+      </ul>
 
-      <li><a href="{{ url_for('public.about') }}">About</a></li>
-
-      <li><a href="mailto:example@gmail.com">Contact</a></li>
-    </ul>
-  </small>
+  </div>
 </footer>
