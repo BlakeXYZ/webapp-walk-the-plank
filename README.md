@@ -3,7 +3,7 @@
 </p> -->
 
 <h1 align="center">
-☠️
+<img src="assets/img/plank_skull.webp" alt="Plank Skull Logo" width="64"/>
 </h1>
 
 <h3 align="center">
