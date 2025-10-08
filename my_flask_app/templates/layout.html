@@ -25,6 +25,11 @@
     <!-- Mobile viewport optimized: h5bp.com/viewport -->
     <meta name="viewport" content="width=device-width" />
 
+    <!-- Socket IO -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+
+
+
     <link
       rel="stylesheet"
       type="text/css"
@@ -60,6 +65,7 @@
     </main>
 
     {% include "footer.html" %}
+
 
     <!-- JavaScript at the bottom for fast page loading -->
     <script src="{{ static_url_for('static', filename='build/main_js.bundle.js') }}"></script>
