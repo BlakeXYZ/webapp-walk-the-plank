@@ -20,7 +20,7 @@ from my_flask_app.extensions import (
 
 import socketio
 from my_flask_app.socketio import sio
-from my_flask_app.socketio.events import register_socketio_events
+from my_flask_app.socketio.socket_server_events import register_socketio_events
 
 
 def create_app(config_object="my_flask_app.settings"):

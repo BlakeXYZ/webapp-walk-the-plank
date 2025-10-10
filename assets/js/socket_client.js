@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('✅ Socket.IO library loaded, connecting...');
         
         const sio = io({
-            transports: ['polling'],
+            transports: ['websocket'],
             timeout: 10000,
             reconnection: true,
             reconnectionAttempts: 3,
@@ -69,6 +69,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('⚠️ Socket not connected');
             }
         };
+
+        window.testMessage_B = (msg) => {
+            if (sio.connected) {
+                console.log('📤 Sending test message B...');
+                sio.emit('test_message_b', msg || 'Hello from the browser, test B!');
+            } else {
+                console.log('⚠️ Socket not connected');
+            }
+        };
+
+        sio.on('responseB', (data) => {
+                    console.log(`📬 !!!! Server B response:\n---- ${data.message} \n---- SID: ${data.sid}`);
+                });
+
+
+
     }
     
     initializeSocketIO();

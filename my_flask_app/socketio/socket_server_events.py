@@ -1,5 +1,6 @@
 from . import sio
 
+
 def register_socketio_events(sio):
     @sio.event
     def connect(sid, environ): 
@@ -40,6 +41,15 @@ def register_socketio_events(sio):
         print(f"📬 Message from {sid}: {data}")
         sio.emit('response', {
             'message': f'Captain received: {data}',
+            'sid': sid
+        }, room=sid)  # Make sure we're responding to the right client
+
+    @sio.event
+    def test_message_b(sid, data):
+        '''Handle test messages from clients'''
+        print(f"📬 Message from {sid}: {data}")
+        sio.emit('responseB', {
+            'message': f'Captain B: {data}',
             'sid': sid
         }, room=sid)  # Make sure we're responding to the right client
         
