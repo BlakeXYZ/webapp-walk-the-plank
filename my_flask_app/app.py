@@ -5,7 +5,6 @@ import logging
 import sys
 
 from flask import Flask, render_template
-import socketio
 
 from my_flask_app import commands, public, user
 from my_flask_app.extensions import (
@@ -19,65 +18,10 @@ from my_flask_app.extensions import (
     migrate,
 )
 
-allowed_socket_cors_origins = os.getenv('SOCKET_CORS_ORIGINS')
-allowed_socket_cors_origins_LIST = [allowed_socket_cors_origins.strip() for allowed_socket_cors_origins in allowed_socket_cors_origins.split(',')] 
-print(f"🔧 DEBUG: Allowed origins for CORS: {allowed_socket_cors_origins_LIST}")
-print(f"🔧 DEBUG: Creating Socket.IO server instance")
+import socketio
+from my_flask_app.socketio import sio
+from my_flask_app.socketio.events import register_socketio_events
 
-sio = socketio.Server(
-    async_mode='gevent', 
-    cors_allowed_origins=allowed_socket_cors_origins_LIST,
-    logger=True,
-    engineio_logger=True
-) 
-
-print(f"🔧 DEBUG: Socket.IO server created: {sio}")
-print(f"🔧 DEBUG: Socket.IO server ID: {id(sio)}")
-
-@sio.event
-def connect(sid, environ): 
-    '''
-    args:
-    - sid = session id, socket io creates a unique session id for each client that connects
-    - environ = dictionary that contains client request information (headers, cookies, IP address, etc). Perform authentication and authorization here. Decide whether to accept or reject the connection.
-    '''
-    client_ip = environ.get('REMOTE_ADDR', 'unknown')
-    
-    # DEBUG: Print EVERYTHING about this connection
-    print(f"🔧 DEBUG: connect() called with SID: {sid}")
-    print(f"🔧 DEBUG: SID type: {type(sid)}")
-    print(f"🔧 DEBUG: SID length: {len(sid)}")
-    print(f"✅ {sid} connected from {client_ip}")
-    
-    # Use the EXACT SID we received - don't modify it
-    actual_sid = sid
-    print(f"🔧 DEBUG: About to emit welcome to: {actual_sid}")
-    
-    # Send welcome message
-    try:
-        sio.emit('welcome', {
-            'message': 'Ahoy! Welcome aboard the pirate ship! 🏴‍☠️',
-            'sid': actual_sid
-        }, room=actual_sid)
-        print(f"🔧 DEBUG: Welcome message sent successfully to {actual_sid}")
-    except Exception as e:
-        print(f"🚫 ERROR sending welcome: {e}")
-
-
-@sio.event
-def disconnect(sid):
-    print(f"❌ {sid} disconnected")
-
-@sio.event
-def test_message(sid, data):
-    '''Handle test messages from clients'''
-    print(f"📬 Message from {sid}: {data}")
-    sio.emit('response', {
-        'message': f'Captain received: {data}',
-        'sid': sid
-    }, room=sid)  # Make sure we're responding to the right client
-    
-#TODO: Move the above socketio event handlers to a separate module and import them here.
 
 def create_app(config_object="my_flask_app.settings"):
     """Create application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.
@@ -95,6 +39,7 @@ def create_app(config_object="my_flask_app.settings"):
     register_commands(app)
     configure_logger(app)
     
+    register_socketio_events(sio)  # Register Socket.IO events
     # wrap Flask application with socketio's WSGI application
     app.wsgi_app = socketio.WSGIApp(
         sio, 

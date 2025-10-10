@@ -1,3 +1,4 @@
+import io from 'socket.io-client';
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🏴‍☠️ Initializing Socket.IO...');
