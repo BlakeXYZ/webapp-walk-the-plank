@@ -41,7 +41,7 @@ services:
     - FLASK_ENV=development
     - FLASK_DEBUG=0
     - DATABASE_URL=postgresql://postgres:password@db-dev:5432/app
-    - SOCKET_CORS_ORIGINS=http://localhost:8080, http://127.0.0.1:8080
+    - SOCKET_CORS_ORIGINS=http://localhost:8080,http://127.0.0.1:8080
     depends_on:
       - db-dev
     <<: *default_volumes

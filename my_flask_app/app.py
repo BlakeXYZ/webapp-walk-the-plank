@@ -19,12 +19,14 @@ from my_flask_app.extensions import (
     migrate,
 )
 
-allowed_origins = os.getenv('SOCKET_CORS_ORIGINS')
+allowed_socket_cors_origins = os.getenv('SOCKET_CORS_ORIGINS')
+allowed_socket_cors_origins_LIST = [allowed_socket_cors_origins.strip() for allowed_socket_cors_origins in allowed_socket_cors_origins.split(',')] 
+print(f"🔧 DEBUG: Allowed origins for CORS: {allowed_socket_cors_origins_LIST}")
 print(f"🔧 DEBUG: Creating Socket.IO server instance")
 
 sio = socketio.Server(
     async_mode='gevent', 
-    cors_allowed_origins=allowed_origins,
+    cors_allowed_origins=allowed_socket_cors_origins_LIST,
     logger=True,
     engineio_logger=True
 ) 
@@ -75,6 +77,7 @@ def test_message(sid, data):
         'sid': sid
     }, room=sid)  # Make sure we're responding to the right client
     
+#TODO: Move the above socketio event handlers to a separate module and import them here.
 
 def create_app(config_object="my_flask_app.settings"):
     """Create application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.
