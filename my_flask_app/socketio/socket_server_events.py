@@ -6,8 +6,6 @@ from . import sio
 
 def register_socketio_events(sio):
 
-
-
 # ----------------------------
 #   Background Task
 # ----------------------------
@@ -26,7 +24,7 @@ def register_socketio_events(sio):
     def connect(sid, environ):
         logger.info(f"🔧 connect handler registered for {sid}")
 
-        # Sending Event to Client from Server.
+        # Sending Server Event to Client.
         sio.start_background_task(task_send_multiply_request, sid)
     
     @sio.event
@@ -36,6 +34,12 @@ def register_socketio_events(sio):
 
     @sio.event
     def client_event_sum(sid, data):
+        """
+        Event Handler for 'client_event_sum'
+
+        returns:
+        - Dictionary with the sum of two numbers sent by the client.
+        """
         logger.info(f"🔧 Received client_event_sum - {data} from {sid}")
 
         result = data['nums'][0] + data['nums'][1]

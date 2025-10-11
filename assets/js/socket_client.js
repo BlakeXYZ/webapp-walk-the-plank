@@ -15,6 +15,7 @@ const sio = io({
 sio.on('connect', () => {
     console.log('✅ Connected to server, SID:', sio.id);
     
+    // Emit event to server with result (callback_function)
     sio.emit('client_event_sum', {nums: [3, 10]}, (result) => {
         console.log('📤 Sent client_event_sum, server responded with:', result);
     });
