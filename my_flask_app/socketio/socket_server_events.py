@@ -122,7 +122,7 @@ def register_socketio_events(sio):
 
 
 # ----------------------------
-#   User Sessions
+#   Part 9. User Sessions
 # ----------------------------
 
 
@@ -141,6 +141,23 @@ def register_socketio_events(sio):
 
 
 
+# Server emit examples:
+#     - Emit a welcome message to a newly connected client.
+#     - Emit a lobby code to the host after lobby creation.
+#     - Emit a confirmation to a player after joining a lobby.
+#     - Broadcast a "game started" event to all clients in a lobby.
+#     - Emit an updated player count to all clients when someone joins or leaves.
+#     - Emit a notification to all clients in a lobby when a player disconnects.
+#     - Emit a message to delete a lobby when it becomes empty.
+
+
+# Client emit examples:
+#     - Emit a request to create a lobby.
+#     - Emit a request to join a lobby with a specific code.
+#     - Emit a request to start the game.
+#     - Emit a message or action to leave a lobby.
+#     - Emit a chat message to other players in the same lobby.
+#     - Emit a disconnect event when leaving the game.
 
 
 
