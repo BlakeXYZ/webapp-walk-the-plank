@@ -1,7 +1,13 @@
 import logging
+import random
 logger = logging.getLogger(__name__)
 
+import socketio
 from . import sio
+
+client_count = 0
+a_count = 0
+b_count = 0
 
 
 def register_socketio_events(sio):
@@ -24,12 +30,47 @@ def register_socketio_events(sio):
     def connect(sid, environ):
         logger.info(f"🔧 connect handler registered for {sid}")
 
-        # Sending Server Event to Client.
-        sio.start_background_task(task_send_multiply_request, sid)
+        global client_count
+        global a_count
+        global b_count
+
+        username = environ.get('HTTP_X_USERNAME') # Authentication - Custom header from client
+        logger.info(f"🔧 Authenticating user: {username}")
+        if not username:
+            raise socketio.exceptions.ConnectionRefusedError('Sorry, Authentication failed! 😢')
+
+        client_count += 1
+        sio.emit('server_event_client_count', {'count': client_count})  # Broadcast to all clients if to=sid is omitted
+
+        if random.random() > 0.5:
+            sio.enter_room(sid, 'my_room_a')
+            a_count += 1
+            sio.emit('server_event_room_count', {'room': 'my_room_a', 'count': a_count}, to='my_room_a') # Broadcast this Server Event to all clients in 'my_room_a'
+        else:
+            sio.enter_room(sid, 'my_room_b')
+            b_count += 1
+            sio.emit('server_event_room_count', {'room': 'my_room_b', 'count': b_count}, to='my_room_b') # Broadcast this Server Event to all clients in 'my_room_b'
+
     
+        # Broadcast Server Event to Client.
+        sio.start_background_task(task_send_multiply_request, sid)
+
     @sio.event
     def disconnect(sid):
         logger.info(f"🔧 disconnect handler registered for {sid}")
+
+        global client_count
+        global a_count
+        global b_count
+        client_count -= 1
+        sio.emit('server_event_client_count', {'count': client_count})  # Broadcast to all clients if to=sid is omitted
+
+        if 'my_room_a' in sio.rooms(sid):
+            a_count -= 1
+            sio.emit('server_event_room_count', {'room': 'my_room_a', 'count': a_count}, to='my_room_a') # Broadcast this Server Event to all clients in 'my_room_a'
+        else:
+            b_count -= 1
+            sio.emit('server_event_room_count', {'room': 'my_room_b', 'count': b_count}, to='my_room_b') # Broadcast this Server Event to all clients in 'my_room_b'
 
 
     @sio.event
@@ -48,17 +89,55 @@ def register_socketio_events(sio):
         return {'result': result}
 
 
+# ----------------------------
+#   Part 6. Broadcast Event Handlers - Allows emitting to all connected clients with a single call
+# ----------------------------
+
+        # sio.emit('server_event_client_count', {'count': client_count})  # Broadcast to all clients if to=sid is omitted
+
+
+# ----------------------------
+#   Part 7. Rooms - Allows grouping of clients, using emit with room parameter to target specific groups
+# ----------------------------
+
+
+        # if random.random() > 0.5:
+        #     sio.enter_room(sid, 'my_room_a')
+        #     a_count += 1
+        #     sio.emit('server_event_room_count', {'room': 'my_room_a', 'count': a_count}, to='my_room_a') # Broadcast this Server Event to all clients in 'my_room_a'
+        # else:
+        #     sio.enter_room(sid, 'my_room_b')
+        #     b_count += 1
+        #     sio.emit('server_event_room_count', {'room': 'my_room_b', 'count': b_count}, to='my_room_b') # Broadcast this Server Event to all clients in 'my_room_b'
+
+    
+
+# ----------------------------
+#   Part 8. Authentication
+#           Connect event handler receives 'environ' dict with client request info (headers, cookies, IP, etc). Use this to authenticate/authorize clients.
+#           Formatted as WSGI environ dict
+# ----------------------------
+
+
+
+
+# ----------------------------
+#   User Sessions
+# ----------------------------
 
 
 
 
 
 
-
-
-
-
-
+# | Step | Action                                             | What Happens                                   |
+# | ---- | -------------------------------------------------- | ---------------------------------------------- |
+# | 1️⃣  | Host connects                                      | Server assigns `sid`                           |
+# | 2️⃣  | Host emits `create_lobby`                          | Server generates `ABCDE` code                  |
+# | 3️⃣  | Other players emit `join_lobby`, `{code: "ABCDE"}` | Server adds them to same room                  |
+# | 4️⃣  | Host emits `start_game`                            | Everyone in the room gets `game_started` event |
+# | 5️⃣  | Player disconnects                                 | Server removes them from the lobby             |
+# | 6️⃣  | Lobby empty                                        | Deleted from memory automatically              |
 
 
 

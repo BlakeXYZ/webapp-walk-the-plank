@@ -2,23 +2,35 @@ import io from 'socket.io-client';
 
 
 const sio = io({
-    transports: ['websocket'],
+    transports: ['polling', 'websocket'],
     timeout: 10000,
     reconnection: true,
     reconnectionAttempts: 3,
     reconnectionDelay: 2000,
     forceNew: true,  // Force new connection
-    autoConnect: true
-    
+    autoConnect: true,
+    transportOptions: {   // Cannot send custom headers with WebSocket transport, SocketIO works by first connecting via HTTP polling, then upgrading to WebSocket
+        polling: {
+            extraHeaders: {
+                'X-Username': 'hardcoded_username_example'  // Custom header for authentication
+            }
+        }
+    }
 });
 
 sio.on('connect', () => {
     console.log('✅ Connected to server, SID:', sio.id);
-    
+    console.log('🔍 Current transport:', sio.io.engine.transport.name); // 'polling' or 'websocket'
+
     // Emit event to server with result (callback_function)
     sio.emit('client_event_sum', {nums: [3, 10]}, (result) => {
         console.log('📤 Sent client_event_sum, server responded with:', result);
     });
+});
+
+sio.on('connect_error', (e) => {
+    // Event Handler for connection errors
+    console.error('❌ Connection error:', e.message);
 });
 
 sio.on('disconnect', () => {
@@ -33,6 +45,17 @@ sio.on('server_event_multiply', (data, cb) => {
     cb({result: result});
 });
 
+
+sio.on('server_event_client_count', (data) => {
+    console.log('📊 ~~~~~~~~~ Current connected clients:', data.count);
+    console.log('🔍 Current transport:', sio.io.engine.transport.name); // 'polling' or 'websocket'
+
+});
+
+sio.on('server_event_room_count', (data) => {
+    console.log(`📊 ~~~~~~~~~ Current clients in ${data.room}:`, data.count);
+    console.log('🔍 Current transport:', sio.io.engine.transport.name); // 'polling' or 'websocket'
+});
 
 
 
