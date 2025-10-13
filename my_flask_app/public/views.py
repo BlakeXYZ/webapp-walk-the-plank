@@ -8,6 +8,7 @@ from flask import (
     render_template,
     request,
     url_for,
+    session
 )
 from flask_login import login_required, login_user, logout_user
 
@@ -75,3 +76,23 @@ def about():
     """About page."""
     form = LoginForm(request.form)
     return render_template("public/about.html", form=form)
+
+
+@blueprint.route("/homepage_test/", methods=["GET", "POST"])
+def homepage_test():
+    """Homepage test."""
+
+    form = RegisterForm(request.form)
+
+    # Check if 'Join' or 'Create' Lobby button was pressed
+    if form.validate_on_submit():
+        if form.join_room.data:
+            flash("Join Room.", "info")
+            return redirect(url_for("public.room"))
+        elif form.create_room.data:
+            flash("Create Room.", "info")
+            return redirect(url_for("public.room"))
+    else:
+        flash_errors(form)
+
+    return render_template("public/homepage_test.html", form=form)

@@ -1,0 +1,40 @@
+
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container">
+    <h1 class="mt-5">Home Page Test</h1>
+</div>
+<br>
+<br>
+<div class="container">
+    <h3>Socket.IO Testing</h3>
+</div>
+
+<div class="container">
+    <br/>
+    <form id="registerForm" class="form form-register" method="POST" action="" role="form">
+           {{ form.csrf_token }}
+            <div class="form-group">
+                {{form.username.label}}
+                {{form.username(placeholder="Enter Custom Username", class_="form-control")}}
+                {% for err in form.username.errors %}
+                    <small class="text-danger">{{ err }}</small>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                {{form.roomcode.label}}
+                {{form.roomcode(placeholder="Enter 4-Letter Room Code", class_="form-control")}}
+                {% for err in form.roomcode.errors %}
+                    <small class="text-danger">{{ err }}</small>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                {{form.join_room(class_="btn btn-primary")}}
+                {{form.create_room(class_="btn btn-primary")}}
+            </div>
+    </form>
+</div>
+
+{% endblock %}
+

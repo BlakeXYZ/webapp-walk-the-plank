@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 """User forms."""
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, StringField
-from wtforms.validators import DataRequired, Email, EqualTo, Length
+from wtforms import StringField, SubmitField
+from wtforms.validators import ValidationError, DataRequired, Optional, Length
 
 from .models import User
 
+import logging
+logger = logging.getLogger(__name__)
 
 class RegisterForm(FlaskForm):
     """Register form."""
@@ -13,16 +15,10 @@ class RegisterForm(FlaskForm):
     username = StringField(
         "Username", validators=[DataRequired(), Length(min=3, max=25)]
     )
-    email = StringField(
-        "Email", validators=[DataRequired(), Email(), Length(min=6, max=40)]
-    )
-    password = PasswordField(
-        "Password", validators=[DataRequired(), Length(min=6, max=40)]
-    )
-    confirm = PasswordField(
-        "Verify password",
-        [DataRequired(), EqualTo("password", message="Passwords must match")],
-    )
+
+    roomcode = StringField("Room Code")
+    join_room = SubmitField("Join Room")
+    create_room = SubmitField("Create Room")
 
     def __init__(self, *args, **kwargs):
         """Create instance."""
@@ -34,12 +30,20 @@ class RegisterForm(FlaskForm):
         initial_validation = super(RegisterForm, self).validate()
         if not initial_validation:
             return False
-        user = User.query.filter_by(username=self.username.data).first()
-        if user:
-            self.username.errors.append("Username already registered")
-            return False
-        user = User.query.filter_by(email=self.email.data).first()
-        if user:
-            self.email.errors.append("Email already registered")
-            return False
-        return True
+        
+        valid = True
+
+        # ---- Join Room Validation ----
+        # TODO: Validate if Room Exists in DB
+        if self.join_room.data:
+            if not self.roomcode.data:
+                self.roomcode.errors.append("Room code required to join a room.")
+                valid = False
+            elif len(self.roomcode.data) != 4:
+                self.roomcode.errors.append("Room code must be 4 characters long.")
+                valid = False
+
+
+        return initial_validation and valid
+
+        

@@ -38,6 +38,12 @@ def register_socketio_events(sio):
         logger.info(f"🔧 Authenticating user: {username}")
         if not username:
             raise socketio.exceptions.ConnectionRefusedError('Sorry, Authentication failed! 😢')
+        
+        with sio.session(sid) as session:
+            session['username'] = username  # User Sessions - Store username in session
+            logger.info(f"🔧 Stored username in session for {sid}: {session['username']}")
+
+        sio.emit('server_event_user_joined', {'message': f'👋 Welcome, {username}!'})
 
         client_count += 1
         sio.emit('server_event_client_count', {'count': client_count})  # Broadcast to all clients if to=sid is omitted
@@ -123,6 +129,8 @@ def register_socketio_events(sio):
 
 # ----------------------------
 #   Part 9. User Sessions
+#           Useful for storing information specific to each connected client (e.g., username, preferences, game state).
+#           Store info, and when getting event from Client, retrieve info from session.
 # ----------------------------
 
 

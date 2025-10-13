@@ -25,6 +25,10 @@ textarea {
   max-width: 700px;
 }
 
+.alert {
+  margin-top: 45px;
+}
+
 /* Forms */
 
 .navbar-form input[type="text"],
