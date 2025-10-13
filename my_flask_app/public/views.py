@@ -87,12 +87,18 @@ def homepage_test():
     # Check if 'Join' or 'Create' Lobby button was pressed
     if form.validate_on_submit():
         if form.join_room.data:
-            flash("Join Room.", "info")
+            session['username'] = form.username.data
             return redirect(url_for("public.room"))
         elif form.create_room.data:
-            flash("Create Room.", "info")
+            session['username'] = form.username.data
             return redirect(url_for("public.room"))
     else:
         flash_errors(form)
 
     return render_template("public/homepage_test.html", form=form)
+
+
+@blueprint.route("/room/", methods=["GET", "POST"])
+def room():
+    """Room page."""
+    return render_template("public/room.html")

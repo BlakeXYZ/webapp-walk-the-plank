@@ -1,64 +1,61 @@
 import io from 'socket.io-client';
 
 
-const sio = io({
-    transports: ['polling', 'websocket'],
-    timeout: 10000,
-    reconnection: true,
-    reconnectionAttempts: 3,
-    reconnectionDelay: 2000,
-    forceNew: true,  // Force new connection
-    autoConnect: true,
-    transportOptions: {   // Cannot send custom headers with WebSocket transport, SocketIO works by first connecting via HTTP polling, then upgrading to WebSocket
-        polling: {
-            extraHeaders: {
-                'X-Username': 'hardcoded_username_example'  // Custom header for authentication
-            }
-        }
-    }
-});
+// const sio = io({
+//     transports: ['polling', 'websocket'],
+//     timeout: 10000,
+//     reconnection: true,
+//     reconnectionAttempts: 3,
+//     reconnectionDelay: 2000,
+//     forceNew: true,  // Force new connection
+//     autoConnect: true,
+//     transportOptions: {   // Cannot send custom headers with WebSocket transport, SocketIO works by first connecting via HTTP polling, then upgrading to WebSocket
+//         polling: {
+//             extraHeaders: {
+//                 'X-Username': 'hardcoded_username_example'  // Custom header for authentication
+//             }
+//         }
+//     }
+// });
 
-sio.on('connect', () => {
-    console.log('✅ Connected to server, SID:', sio.id);
+// sio.on('connect', () => {
+//     console.log('✅ Connected to server, SID:', sio.id);
 
-    // Emit event to server with result (callback_function)
-    sio.emit('client_event_sum', {nums: [3, 10]}, (result) => {
-        console.log('📤 Sent client_event_sum, server responded with:', result);
-    });
-});
+//     // Emit event to server with result (callback_function)
+//     sio.emit('client_event_sum', {nums: [3, 10]}, (result) => {
+//         console.log('📤 Sent client_event_sum, server responded with:', result);
+//     });
+// });
 
-sio.on('connect_error', (e) => {
-    // Event Handler for connection errors
-    console.error('❌ Connection error:', e.message);
-});
+// sio.on('connect_error', (e) => {
+//     // Event Handler for connection errors
+//     console.error('❌ Connection error:', e.message);
+// });
 
-sio.on('disconnect', () => {
-    console.log('❌ Disconnected from server.');
-});
+// sio.on('disconnect', () => {
+//     console.log('❌ Disconnected from server.');
+// });
 
-// Handle event from server and respond via cb (callback)
-sio.on('server_event_multiply', (data, cb) => {
-    console.log('📬 Client received server_event_multiply:', data);
-    const result = data.nums[0] * data.nums[1];
-    console.log('🔧 Computed multiply: ', result);
-    cb({result: result});
-});
+// // Handle event from server and respond via cb (callback)
+// sio.on('server_event_multiply', (data, cb) => {
+//     console.log('📬 Client received server_event_multiply:', data);
+//     const result = data.nums[0] * data.nums[1];
+//     console.log('🔧 Computed multiply: ', result);
+//     cb({result: result});
+// });
 
-sio.on('server_event_user_joined', (data) => {
-    console.log(data.message);
-});
+// sio.on('server_event_user_joined', (data) => {
+//     console.log(data.message);
+// });
 
-sio.on('server_event_client_count', (data) => {
-    console.log('📊 ~~~~~~~~~ Current connected clients:', data.count);
+// sio.on('server_event_client_count', (data) => {
+//     console.log('📊 ~~~~~~~~~ Current connected clients:', data.count);
 
-});
+// });
 
-sio.on('server_event_room_count', (data) => {
-    console.log(`📊 ~~~~~~~~~ Current clients in ${data.room}:`, data.count);
-});
-
-
-
+// sio.on('server_event_room_count', (data) => {
+//     console.log(`📊 ~~~~~~~~~ Current clients in ${data.room}:`, data.count);
+// });
 
 
 
