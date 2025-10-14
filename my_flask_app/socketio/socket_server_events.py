@@ -30,9 +30,9 @@ def register_socketio_events(sio):
     def connect(sid, environ):
         logger.info(f"🔧 connect handler registered for {sid}")
 
-        # global client_count
-        # global a_count
-        # global b_count
+        global client_count
+        global a_count
+        global b_count
 
         # username = environ.get('HTTP_X_USERNAME') # Authentication - Custom header from client
         # logger.info(f"🔧 Authenticating user: {username}")
@@ -48,14 +48,14 @@ def register_socketio_events(sio):
         # client_count += 1
         # sio.emit('server_event_client_count', {'count': client_count})  # Broadcast to all clients if to=sid is omitted
 
-        # if random.random() > 0.5:
-        #     sio.enter_room(sid, 'my_room_a')
-        #     a_count += 1
-        #     sio.emit('server_event_room_count', {'room': 'my_room_a', 'count': a_count}, to='my_room_a') # Broadcast this Server Event to all clients in 'my_room_a'
-        # else:
-        #     sio.enter_room(sid, 'my_room_b')
-        #     b_count += 1
-        #     sio.emit('server_event_room_count', {'room': 'my_room_b', 'count': b_count}, to='my_room_b') # Broadcast this Server Event to all clients in 'my_room_b'
+        if random.random() > 0.5:
+            sio.enter_room(sid, 'AAAA')
+            a_count += 1
+            # sio.emit('server_event_room_count', {'room': 'AAAA', 'count': a_count}, to='AAAA') # Broadcast this Server Event to all clients in 'AAAA'
+        else:
+            sio.enter_room(sid, 'BBBB')
+            b_count += 1
+            # sio.emit('server_event_room_count', {'room': 'BBBB', 'count': b_count}, to='BBBB') # Broadcast this Server Event to all clients in 'BBBB'
 
     
         # # Broadcast Server Event to Client.
@@ -94,6 +94,23 @@ def register_socketio_events(sio):
 
         return {'result': result}
     
+
+    @sio.event
+    def client_event_get_active_rooms(sid, data):
+        """
+        Event Handler for 'client_event_get_active_rooms'
+
+        returns:
+        - List of active room names.
+        """
+        logger.info(f"🔧 Received client_event_get_active_rooms from {sid}")
+
+        rooms = sio.manager.rooms.get('/', {}).keys()  # Get all rooms in the default namespace
+        active_rooms = [room for room in rooms if room != sid]  # Exclude individual client rooms
+
+        logger.info(f"🔧 Active rooms: {active_rooms}")
+
+        return active_rooms
 
     # @sio.event
     # def client_event_create_room(sid, data):

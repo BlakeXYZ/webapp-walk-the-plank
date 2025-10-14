@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """User forms."""
+from tokenize import String
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import ValidationError, DataRequired, Optional, Length
@@ -16,6 +17,7 @@ class RegisterForm(FlaskForm):
     roomcode = StringField("Room Code")
     join_room = SubmitField("Join Room")
     create_room = SubmitField("Create Room")
+    active_rooms = StringField("Active Rooms")
 
     def __init__(self, *args, **kwargs):
         """Create instance."""
@@ -29,6 +31,8 @@ class RegisterForm(FlaskForm):
             return False
         
         valid = True
+
+        logger.debug(f"🛠️ ------------------ DEBUG: Starting custom validation for RegisterForm with data: {self.data}")
 
         self.username.data = self.username.data.strip()
         # ---- Username Validation ----
@@ -49,6 +53,9 @@ class RegisterForm(FlaskForm):
                 valid = False
             elif len(self.roomcode.data) != 4:
                 self.roomcode.errors.append("Room code must be 4 characters long.")
+                valid = False
+            elif self.roomcode.data not in self.active_rooms.data:
+                self.roomcode.errors.append(f"A Room with code '{self.roomcode.data}' does not exist! Please check and try again.")
                 valid = False
         logger.info(f"🛠️ DEBUG: Form validation result - initial: {initial_validation}, overall: {valid}")
         return initial_validation and valid

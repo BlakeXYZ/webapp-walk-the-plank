@@ -63,6 +63,34 @@ sio.on('connect', () => {
 // });
 
 
+
+function waitForSocketConnection() {
+    return new Promise((resolve) => {
+        if (sio.connected) resolve();
+        sio.on('connect', resolve);
+        sio.connect();
+    });
+}
+
+function emitClientSumEvent() {
+    // Emit event to server with result (callback_function)
+    sio.emit('client_event_sum', {nums: [3, 10]}, (result) => {
+        console.log('📤 Sent client_event_sum, server responded with:', result);
+    });
+}
+
+function clientEventGetActiveRooms() {
+    // Emit event to server with result (callback_function)
+    return new Promise((resolve, reject) => {
+        if (!sio.connected) return reject(new Error('Socket not connected'));
+        sio.emit('client_event_get_active_rooms', {}, (rooms) => {
+            console.log('📤 Sent client_event_get_active_rooms, server responded with:', rooms);
+            resolve(rooms);
+        });
+    });
+}
+
+
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
     e.preventDefault(); // prevent default page reload
 
@@ -75,9 +103,27 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
     const submitType = document.activeElement.id;
     payload.submitType = submitType;
 
-    console.log("Payload to send:", payload);
 
+    //TODO: Query SocketIO Dictionary of Active Rooms
+    // const activeRooms = await sio.emit('get_active_rooms', (rooms) => {
+    //     console.log('Active Rooms:', rooms);
+    //     return rooms;
+    // });
+
+    
     try {
+        // Ensure socket connection is established
+        await waitForSocketConnection();
+        console.log("Socket connected with SID:", sio.id);
+
+        // Once connected, Get Active Rooms
+        const activeRooms = await clientEventGetActiveRooms();
+        payload.activeRooms = activeRooms;
+        console.log("Active Rooms from server:", activeRooms);
+
+        console.log("Payload to send:", payload);
+
+
         const response = await fetch('/ajax/test_ajax', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},

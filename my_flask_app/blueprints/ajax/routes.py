@@ -15,10 +15,11 @@ def create_lobby():
 @blueprint.route('/test_ajax', methods=['POST'])
 def test_ajax():
     data = request.json
-    form = RegisterForm(data=data)
+    form = RegisterForm(data=data, activeRooms=data.get('activeRooms', []))
 
     form.join_room.data = data.get("submitType") == "join_room"
     form.create_room.data = data.get("submitType") == "create_room"
+    form.active_rooms.data = data.get("activeRooms", "")
 
     logger.debug(f"🛠️ DEBUG: ------------ Received AJAX data: {data}")
 
