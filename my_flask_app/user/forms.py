@@ -12,10 +12,7 @@ logger = logging.getLogger(__name__)
 class RegisterForm(FlaskForm):
     """Register form."""
 
-    username = StringField(
-        "Username", validators=[DataRequired(), Length(min=3, max=25)]
-    )
-
+    username = StringField("Username")
     roomcode = StringField("Room Code")
     join_room = SubmitField("Join Room")
     create_room = SubmitField("Create Room")
@@ -33,6 +30,17 @@ class RegisterForm(FlaskForm):
         
         valid = True
 
+        self.username.data = self.username.data.strip()
+        # ---- Username Validation ----
+        if self.username.data:
+            if len(self.username.data) < 3:
+                self.username.errors.append("Username must be at least 3 characters long.")
+                valid = False
+            elif len(self.username.data) > 16:
+                self.username.errors.append("Username cannot be longer than 16 characters.")
+                valid = False
+ 
+
         # ---- Join Room Validation ----
         # TODO: Validate if Room Exists in DB
         if self.join_room.data:
@@ -42,8 +50,7 @@ class RegisterForm(FlaskForm):
             elif len(self.roomcode.data) != 4:
                 self.roomcode.errors.append("Room code must be 4 characters long.")
                 valid = False
-
-
+        logger.info(f"🛠️ DEBUG: Form validation result - initial: {initial_validation}, overall: {valid}")
         return initial_validation and valid
 
         

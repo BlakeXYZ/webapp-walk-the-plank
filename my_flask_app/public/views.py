@@ -84,16 +84,16 @@ def homepage_test():
 
     form = RegisterForm(request.form)
 
-    # Check if 'Join' or 'Create' Lobby button was pressed
-    if form.validate_on_submit():
-        if form.join_room.data:
-            session['username'] = form.username.data
-            return redirect(url_for("public.room"))
-        elif form.create_room.data:
-            session['username'] = form.username.data
-            return redirect(url_for("public.room"))
-    else:
-        flash_errors(form)
+    # # Check if 'Join' or 'Create' Lobby button was pressed
+    # if form.validate_on_submit():
+    #     if form.join_room.data:
+    #         session['username'] = form.username.data
+    #         return redirect(url_for("public.room"))
+    #     elif form.create_room.data:
+    #         session['username'] = form.username.data
+    #         return redirect(url_for("public.room"))
+    # else:
+    #     flash_errors(form)
 
     return render_template("public/homepage_test.html", form=form)
 

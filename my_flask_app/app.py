@@ -7,6 +7,7 @@ import sys
 from flask import Flask, render_template
 
 from my_flask_app import commands, public, user
+from my_flask_app.blueprints import ajax
 from my_flask_app.extensions import (
     bcrypt,
     cache,
@@ -65,6 +66,8 @@ def register_blueprints(app):
     """Register Flask blueprints."""
     app.register_blueprint(public.views.blueprint)
     app.register_blueprint(user.views.blueprint)
+    app.register_blueprint(ajax.routes.blueprint)  
+    csrf_protect.exempt(ajax.routes.blueprint) 
     return None
 
 
