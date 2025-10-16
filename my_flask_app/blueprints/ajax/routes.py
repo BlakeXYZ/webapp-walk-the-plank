@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, session
 from my_flask_app.user.forms import RegisterForm
 import logging
 
@@ -23,13 +23,17 @@ def test_ajax():
 
     logger.debug(f"🛠️ DEBUG: ------------ Received AJAX data: {data}")
 
-    #TODO: from socket client lobby.js pass in DICT of socketio room data
-    # and compare against user entered roomcode to validate if room exists
-
     if form.validate():
-        # Do your logic, e.g., set session, etc.
-        logger.info(f"🔧 ~~~ INFO: AJAX form validated successfully with data: {form.data}")
-        return jsonify({"success": True})
+        if data.get("submitType") == "join_room":
+            session['username'] = form.username.data
+            session['roomcode'] = form.roomcode.data
+
+            return jsonify({"success": True, "submitType": "join_room", "roomcode": form.roomcode.data})
+
+        if data.get("submitType") == "create_room":
+            session['username'] = form.username.data
+
+
     else:
         # Collect field errors to return inline
         for field in form:

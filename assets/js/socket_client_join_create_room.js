@@ -19,6 +19,24 @@ sio.on('connect', () => {
 });
 
 
+sio.on('server_event_room_update', (data) => {
+
+    console.log('📥 ====  ~~~~~~~~~  ===== Received server_event_room_update:', data);
+
+    // const ul_room_user_names = document.getElementById('ul_room_user_names');
+    const div_room_user_count = document.getElementById('div_room_user_count');
+
+    // // Clear existing player names
+    // ul_room_user_names = '';
+
+    if (div_room_user_count && data.room_user_count) {
+        div_room_user_count.textContent = `Users in room: ${data.room_user_count}`;
+    }
+
+
+});
+
+
 
 // document.getElementById('button_emit_client_event').addEventListener('click', function(event) {
 //     // Your code to handle the create room action goes here
@@ -90,60 +108,103 @@ function clientEventGetActiveRooms() {
     });
 }
 
-
-document.getElementById("registerForm").addEventListener("submit", async (e) => {
-    e.preventDefault(); // prevent default page reload
-
-    // Clear previous error messages
-    document.getElementById("username_error").innerText = "";
-    document.getElementById("roomcode_error").innerText = "";
-
-    const formData = new FormData(e.target);
-    const payload = Object.fromEntries(formData.entries());
-    const submitType = document.activeElement.id;
-    payload.submitType = submitType;
-
-
-    //TODO: Query SocketIO Dictionary of Active Rooms
-    // const activeRooms = await sio.emit('get_active_rooms', (rooms) => {
-    //     console.log('Active Rooms:', rooms);
-    //     return rooms;
-    // });
-
-    
-    try {
-        // Ensure socket connection is established
-        await waitForSocketConnection();
-        console.log("Socket connected with SID:", sio.id);
-
-        // Once connected, Get Active Rooms
-        const activeRooms = await clientEventGetActiveRooms();
-        payload.activeRooms = activeRooms;
-        console.log("Active Rooms from server:", activeRooms);
-
-        console.log("Payload to send:", payload);
-
-
-        const response = await fetch('/ajax/test_ajax', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(payload),
+function clientEventJoinRoom(roomcode) {
+    // Emit event to server with result (callback_function)
+    return new Promise((resolve, reject) => {
+        if (!sio.connected) return reject(new Error('Socket not connected'));
+        sio.emit('client_event_join_room', { roomcode }, (response) => {
+            console.log('📤 Sent client_event_join_room, server responded with:', response);
+            if (response.error) {
+                // Show warning message to user
+                alert("You must join or create a room first.");
+                // Redirect to home page
+                window.location.href = "/";
+                return reject(new Error(response.error));
+            }            
+            resolve(response);
         });
+    });
+}
 
-        const result = await response.json();
-        console.log("Server Response:", result);
 
-        if (result.success) {
-            document.getElementById("server_response_div").innerText = "Server Response: Success!";
-        } else {
-            if (result.errors.username) {
-                document.getElementById("username_error").innerText = result.errors.username.join(", ");
-            }
-            if (result.errors.roomcode) {
-                document.getElementById("roomcode_error").innerText = result.errors.roomcode.join(", ");
-            }
-        }
-    } catch (error) {
-        console.error("Error sending payload:", error);
-    }
+document.addEventListener("DOMContentLoaded", async () => {
+
+    // Only run on /room/ page
+    if (window.location.pathname !== "/room/") return;
+    const roomcode = document.getElementById("roomcode").value;
+    console.log("Room code from DOM:", roomcode);
+
+    // Wait for socket connection
+    await waitForSocketConnection();
+    // Immediately tell server "I'm in this room"
+    await clientEventJoinRoom(roomcode);
+
+    // Listen for room updates
+    sio.on("server_event_room_update", (data) => {
+        console.log("📩 Room update received:", data);
+        const el = document.getElementById("room_user_count");
+        if (el) el.innerText = `Users in Room: ${data.room_user_count}`;
+    });
 });
+
+
+const registerForm = document.getElementById("registerForm");
+if (registerForm) {
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+        e.preventDefault(); // prevent default page reload
+
+        // ----- Clear previous error messages -----
+        document.getElementById("username_error").innerText = "";
+        document.getElementById("roomcode_error").innerText = "";
+
+        // ----- Gather form data -----
+        const formData = new FormData(e.target);
+        const payload = Object.fromEntries(formData.entries());
+        const submitType = document.activeElement.id;
+        payload.submitType = submitType;
+        
+        try {
+            // ----- Ensure socket connection is established -----
+            await waitForSocketConnection();
+            console.log("Socket connected with SID:", sio.id);
+
+            // ----- Once connected, Get Active Rooms -----
+            const activeRooms = await clientEventGetActiveRooms();
+            payload.activeRooms = activeRooms;
+
+
+            // ----- Send AJAX request to server -----
+            const response = await fetch('/ajax/test_ajax', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload),
+            });
+
+            const result = await response.json();
+            console.log("Server Response:", result);
+
+            if (result.success) {
+                // TODO: Redirect to game lobby or another page
+                document.getElementById("server_response_div").innerText = "Server Response: Success!";
+
+
+                // ----- Join the room via Socket.IO -----
+                if (result.submitType === "join_room") {
+                    window.location.href = `/room/`;
+                    await clientEventJoinRoom(result.roomcode);
+                    console.log(`Joined room ${result.roomcode} via Socket.IO`);
+                }
+
+            } else {
+                if (result.errors.username) {
+                    document.getElementById("username_error").innerText = result.errors.username.join(", ");
+                }
+                if (result.errors.roomcode) {
+                    document.getElementById("roomcode_error").innerText = result.errors.roomcode.join(", ");
+                }
+            }
+        } catch (error) {
+            console.error("Error sending payload:", error);
+        }
+    });
+}

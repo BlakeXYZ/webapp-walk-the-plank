@@ -46,7 +46,6 @@ class RegisterForm(FlaskForm):
  
 
         # ---- Join Room Validation ----
-        # TODO: Validate if Room Exists in DB
         if self.join_room.data:
             if not self.roomcode.data:
                 self.roomcode.errors.append("Room code required to join a room.")
@@ -57,6 +56,11 @@ class RegisterForm(FlaskForm):
             elif self.roomcode.data not in self.active_rooms.data:
                 self.roomcode.errors.append(f"A Room with code '{self.roomcode.data}' does not exist! Please check and try again.")
                 valid = False
+
+
+ 
+
+
         logger.info(f"🛠️ DEBUG: Form validation result - initial: {initial_validation}, overall: {valid}")
         return initial_validation and valid
 

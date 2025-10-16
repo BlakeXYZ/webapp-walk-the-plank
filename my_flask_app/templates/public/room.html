@@ -3,8 +3,17 @@
 {% block content %}
 
 <div class="container">
-    <h1 class="mt-5">Room</h1>
+    <input type="hidden" id="roomcode" value="{{ roomcode }}">
+    <h1 class="mt-5">Greetings {{ username }}</h1>
+    <h1 class="mt-5">Welcome to Room {{ roomcode }}</h1>
+    <br>
+    <br>
+    <ul id="ul_room_user_names">-</ul>
+    <div id="div_room_user_count">-</div>
 </div>
+
+
+
 <br>
 <br>
 
