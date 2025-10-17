@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, session
 from my_flask_app.user.forms import RegisterForm
 import logging
 
@@ -28,8 +28,12 @@ def test_ajax():
 
     if form.validate():
         # Do your logic, e.g., set session, etc.
+
+        session['username'] = form.username.data
+        session['roomcode'] = form.roomcode.data
+
         logger.info(f"🔧 ~~~ INFO: AJAX form validated successfully with data: {form.data}")
-        return jsonify({"success": True})
+        return jsonify({"payload": form.data, "success": True})
     else:
         # Collect field errors to return inline
         for field in form:

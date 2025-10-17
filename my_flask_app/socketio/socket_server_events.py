@@ -1,7 +1,9 @@
+from calendar import c
 import logging
 import random
 logger = logging.getLogger(__name__)
 
+from my_flask_app import user
 import socketio
 from . import sio
 
@@ -9,7 +11,8 @@ client_count = 0
 a_count = 0
 b_count = 0
 
-
+room_DICT = {} # Structure: { roomcode1: [ {sid: xxx, username: xxx}, ... ], roomcode2: [ ... ] }
+ 
 def register_socketio_events(sio):
 
 # ----------------------------
@@ -22,6 +25,17 @@ def register_socketio_events(sio):
         logger.info(f"🔧 my_task -- server_event_multiply result using sio.call: {result}")
 
 
+    def cleanup_room_DICT():
+        # Remove rooms with empty roomcode
+        if '' in room_DICT:
+            del room_DICT['']
+        # Remove users with empty username
+        for room, users in list(room_DICT.items()):
+            room_DICT[room] = [u for u in users if u['username']]
+            # Remove room if now empty
+            if not room_DICT[room]:
+                del room_DICT[room]
+
 
 # ----------------------------
 #   Event Handlers
@@ -30,71 +44,35 @@ def register_socketio_events(sio):
     def connect(sid, environ):
         logger.info(f"🔧 connect handler registered for {sid}")
 
-        global client_count
-        global a_count
-        global b_count
-
-        # username = environ.get('HTTP_X_USERNAME') # Authentication - Custom header from client
-        # logger.info(f"🔧 Authenticating user: {username}")
-        # if not username:
-        #     raise socketio.exceptions.ConnectionRefusedError('Sorry, Authentication failed! 😢')
-        
-        # with sio.session(sid) as session:
-        #     session['username'] = username  # User Sessions - Store username in session
-        #     logger.info(f"🔧 Stored username in session for {sid}: {session['username']}")
-
-        # sio.emit('server_event_user_joined', {'message': f'👋 Welcome, {username}!'})
-
-        # client_count += 1
-        # sio.emit('server_event_client_count', {'count': client_count})  # Broadcast to all clients if to=sid is omitted
-
         if random.random() > 0.5:
             sio.enter_room(sid, 'AAAA')
-            a_count += 1
-            # sio.emit('server_event_room_count', {'room': 'AAAA', 'count': a_count}, to='AAAA') # Broadcast this Server Event to all clients in 'AAAA'
         else:
             sio.enter_room(sid, 'BBBB')
-            b_count += 1
-            # sio.emit('server_event_room_count', {'room': 'BBBB', 'count': b_count}, to='BBBB') # Broadcast this Server Event to all clients in 'BBBB'
-
     
-        # # Broadcast Server Event to Client.
-        # sio.start_background_task(task_send_multiply_request, sid)
 
     @sio.event
     def disconnect(sid):
         logger.info(f"🔧 disconnect handler registered for {sid}")
 
-        global client_count
-        global a_count
-        global b_count
-        client_count -= 1
-        sio.emit('server_event_client_count', {'count': client_count})  # Broadcast to all clients if to=sid is omitted
+        rooms = sio.rooms(sid)
+        for room in rooms:
+            if room == sid:
+                continue  # Skip individual client room
 
-        if 'my_room_a' in sio.rooms(sid):
-            a_count -= 1
-            sio.emit('server_event_room_count', {'room': 'my_room_a', 'count': a_count}, to='my_room_a') # Broadcast this Server Event to all clients in 'my_room_a'
-        else:
-            b_count -= 1
-            sio.emit('server_event_room_count', {'room': 'my_room_b', 'count': b_count}, to='my_room_b') # Broadcast this Server Event to all clients in 'my_room_b'
+            if room in room_DICT:
+                room_DICT[room] = [u for u in room_DICT[room] if u["sid"] != sid]
+                if not room_DICT[room]:
+                    del room_DICT[room]
+
+            sio.leave_room(sid, room)
+            cleanup_room_DICT()
+            server_event_room_update(room)  # Notify others in the room about the update
+        
 
 
-    @sio.event
-    def client_event_sum(sid, data):
-        """
-        Event Handler for 'client_event_sum'
-
-        returns:
-        - Dictionary with the sum of two numbers sent by the client.
-        """
-        logger.info(f"🔧 Received client_event_sum - {data} from {sid}")
-
-        result = data['nums'][0] + data['nums'][1]
-        logger.info(f"🔧 Computed sum: {result}")
-
-        return {'result': result}
-    
-
+# ----------------------------
+#   GET ACTIVE ROOMS
+# ----------------------------
     @sio.event
     def client_event_get_active_rooms(sid, data):
         """
@@ -112,20 +90,84 @@ def register_socketio_events(sio):
 
         return active_rooms
 
-    # @sio.event
-    # def client_event_create_room(sid, data):
-    #     """
-    #     Event Handler for 'client_event_create_room'
-    #     """
-    #     room = data.get('room')
-    #     if room:
-    #         sio.enter_room(sid, room)
-    #         logger.info(f"🔧 {sid} joined room: {room}")
-    #         return {'message': f'Joined room: {room}'}
-    #     else:
-    #         logger.warning(f"🚫 {sid} tried to join room without specifying a room name.")
-    #         return {'error': 'No room specified'}
-        
+
+
+
+# ----------------------------
+#   JOIN ROOM
+# ----------------------------
+    @sio.event
+    def client_event_join_room(sid, data):
+        username = data["username"]
+        room = data["roomcode"]
+
+        # Prevent duplicates
+        if any(u["username"] == username for u in room_DICT.get(room, [])):
+            server_event_room_update(room)  # Notify others in the room about the update
+            return {"msg": "Already connected."}
+
+        room_DICT.setdefault(room, []).append({"sid": sid, "username": username})
+        cleanup_room_DICT()
+        sio.enter_room(sid, room)
+        server_event_room_update(room)  # Notify others in the room about the update
+
+        logger.info(f"🔧 +++++++++++++++ {username} ({sid}) joined room: {room}")
+        logger.info(f"🔧 +++++++++++++++ connected_users_DICT: {room_DICT}")
+
+        return {"msg": f"Joined room: {room}"}
+
+
+# ----------------------------
+#   LEAVE ROOM
+# ----------------------------
+    @sio.event
+    def client_event_leave_room(sid, data):
+        username = data["username"]
+        room = data["roomcode"]
+
+        if room in room_DICT:
+            room_DICT[room] = [u for u in room_DICT[room] if u["sid"] != sid]
+            if not room_DICT[room]:
+                del room_DICT[room]
+
+        cleanup_room_DICT()
+        sio.leave_room(sid, room)
+        server_event_room_update(room)  # Notify others in the room about the update
+
+        logger.info(f"🔧 --------------- {username} ({sid}) left room: {room}")
+        logger.info(f"🔧 --------------- connected_users_DICT: {room_DICT}")
+
+        return {"msg": f"Left room: {room}"}
+
+
+
+# ----------------------------
+#   ROOM UPDATE
+# ----------------------------
+    @sio.event
+    def server_event_room_update(roomcode):
+        room_members = room_DICT.get(roomcode, [])
+        user_count = len(room_members)
+
+        update_data = {
+            'room_user_count': user_count,
+            'room_username_list': [u['username'] for u in room_members]
+        }
+
+        logger.info(f"🔧 Emitting room update for {roomcode}: {update_data}")
+        sio.emit('server_event_room_update', update_data, to=roomcode)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # ----------------------------

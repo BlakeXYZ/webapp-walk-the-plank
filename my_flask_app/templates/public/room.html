@@ -1,9 +1,15 @@
 
 {% extends "layout.html" %}
+
+
 {% block content %}
+<input type="hidden" id="username" value="{{ username }}">
+<input type="hidden" id="roomcode" value="{{ roomcode }}">
 
 <div class="container">
     <h1 class="mt-5">Room</h1>
+    <h3>Welcome {{ username }} to room {{ roomcode }}</h3>
+    <div id="roomInfo">----</div>
 </div>
 <br>
 <br>
