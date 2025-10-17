@@ -14,29 +14,7 @@ b_count = 0
 room_DICT = {} # Structure: { roomcode1: [ {sid: xxx, username: xxx}, ... ], roomcode2: [ ... ] }
  
 def register_socketio_events(sio):
-
-# ----------------------------
-#   Background Task
-# ----------------------------
-    def task_send_multiply_request(sid):
-        """Background task: Ask client to multiply two numbers and return the result using .js cb (callback) and sio.call."""
-        sio.sleep(2)
-        result = sio.call('server_event_multiply', {'nums': [5, 5]}, to=sid)
-        logger.info(f"🔧 my_task -- server_event_multiply result using sio.call: {result}")
-
-
-    def cleanup_room_DICT():
-        # Remove rooms with empty roomcode
-        if '' in room_DICT:
-            del room_DICT['']
-        # Remove users with empty username
-        for room, users in list(room_DICT.items()):
-            room_DICT[room] = [u for u in users if u['username']]
-            # Remove room if now empty
-            if not room_DICT[room]:
-                del room_DICT[room]
-
-
+    """Register SocketIO event handlers and utilities."""
 # ----------------------------
 #   Event Handlers
 # ----------------------------
@@ -49,7 +27,6 @@ def register_socketio_events(sio):
         else:
             sio.enter_room(sid, 'BBBB')
     
-
     @sio.event
     def disconnect(sid):
         logger.info(f"🔧 disconnect handler registered for {sid}")
@@ -68,8 +45,6 @@ def register_socketio_events(sio):
             cleanup_room_DICT()
             server_event_room_update(room)  # Notify others in the room about the update
         
-
-
 # ----------------------------
 #   GET ACTIVE ROOMS
 # ----------------------------
@@ -89,10 +64,7 @@ def register_socketio_events(sio):
         logger.info(f"🔧 Active rooms: {active_rooms}")
 
         return active_rooms
-
-
-
-
+    
 # ----------------------------
 #   JOIN ROOM
 # ----------------------------
@@ -116,7 +88,6 @@ def register_socketio_events(sio):
 
         return {"msg": f"Joined room: {room}"}
 
-
 # ----------------------------
 #   LEAVE ROOM
 # ----------------------------
@@ -139,8 +110,6 @@ def register_socketio_events(sio):
 
         return {"msg": f"Left room: {room}"}
 
-
-
 # ----------------------------
 #   ROOM UPDATE
 # ----------------------------
@@ -157,7 +126,19 @@ def register_socketio_events(sio):
         logger.info(f"🔧 Emitting room update for {roomcode}: {update_data}")
         sio.emit('server_event_room_update', update_data, to=roomcode)
 
-
+# ----------------------------
+#   Helper Functions
+# ----------------------------
+    def cleanup_room_DICT():
+        # Remove rooms with empty roomcode
+        if '' in room_DICT:
+            del room_DICT['']
+        # Remove users with empty username
+        for room, users in list(room_DICT.items()):
+            room_DICT[room] = [u for u in users if u['username']]
+            # Remove room if now empty
+            if not room_DICT[room]:
+                del room_DICT[room]
 
 
 
