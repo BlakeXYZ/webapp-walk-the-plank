@@ -34,8 +34,8 @@ class RegisterForm(FlaskForm):
 
         logger.debug(f"🛠️ ------------------ DEBUG: Starting custom validation for RegisterForm with data: {self.data}")
 
-        self.username.data = self.username.data.strip()
         # ---- Username Validation ----
+        self.username.data = self.username.data.strip()
         if self.username.data:
             if len(self.username.data) < 3:
                 self.username.errors.append("Username must be at least 3 characters long.")
@@ -43,10 +43,17 @@ class RegisterForm(FlaskForm):
             elif len(self.username.data) > 16:
                 self.username.errors.append("Username cannot be longer than 16 characters.")
                 valid = False
+
+        else:
+            self.username.errors.append("Username is required.")
+            valid = False
  
 
         # ---- Join Room Validation ----
-        # TODO: Validate if Room Exists in DB
+        # standardize roomcode to uppercase and strip spaces
+        if self.roomcode.data: 
+            self.roomcode.data = self.roomcode.data.strip().upper()
+
         if self.join_room.data:
             if not self.roomcode.data:
                 self.roomcode.errors.append("Room code required to join a room.")
