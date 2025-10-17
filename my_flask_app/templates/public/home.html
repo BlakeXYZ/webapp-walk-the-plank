@@ -6,7 +6,30 @@
     <h1 class="mt-5">Home</h1>
 </div>
 <br>
-<br>
+
+<div class="container d-flex flex-column justify-content-center align-items-center">
+    <h3>Socket.IO Testing</h3>
+    
+    <form id="registerForm" class="form form-register" method="POST" action="" role="form">
+           {{ form.csrf_token }}
+            <div class="form-group mt-2">
+                {{form.username.label}}
+                {{form.username(placeholder="Enter Custom Username", class_="form-control")}}
+                <small class="text-danger" id="username_error"></small>
+            </div>
+            <div class="form-group mt-2">
+                {{form.roomcode.label}}
+                {{form.roomcode(placeholder="Enter 4-Letter Room Code", class_="form-control")}}
+                <small class="text-danger" id="roomcode_error"></small>
+            </div>
+            <div class="form-group mt-3 d-flex justify-content-center gap-3">
+                {{form.join_room(class_="btn btn-primary w-100")}}
+                {{form.create_room(class_="btn btn-primary w-100")}}
+            </div>
+            <small class="text-danger" id="submitType_error"></small>
+    </form>
+    <div id="server_response_div"></div>
+</div>
 
 {% endblock %}
 

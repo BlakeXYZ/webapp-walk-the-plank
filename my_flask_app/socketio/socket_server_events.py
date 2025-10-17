@@ -21,11 +21,6 @@ def register_socketio_events(sio):
     @sio.event
     def connect(sid, environ):
         logger.info(f"🔧 connect handler registered for {sid}")
-
-        if random.random() > 0.5:
-            sio.enter_room(sid, 'AAAA')
-        else:
-            sio.enter_room(sid, 'BBBB')
     
     @sio.event
     def disconnect(sid):

@@ -15,7 +15,8 @@ def create_lobby():
 @blueprint.route('/test_ajax', methods=['POST'])
 def test_ajax():
     data = request.json
-    form = RegisterForm(data=data, activeRooms=data.get('activeRooms', []))
+    active_rooms = data.get('activeRooms', [])
+    form = RegisterForm(data=data, activeRooms=active_rooms)
 
     form.join_room.data = data.get("submitType") == "join_room"
     form.create_room.data = data.get("submitType") == "create_room"
@@ -27,10 +28,14 @@ def test_ajax():
     # and compare against user entered roomcode to validate if room exists
 
     if form.validate():
-        # Do your logic, e.g., set session, etc.
-
-        session['username'] = form.username.data
-        session['roomcode'] = form.roomcode.data
+        if form.join_room.data:
+            session['username'] = form.username.data
+            session['roomcode'] = form.roomcode.data
+        elif form.create_room.data:
+            session['username'] = form.username.data
+            session['roomcode'] = build_roomcode(active_rooms)
+        else:
+            return {"errors": {"submitType": ["Please select <strong>Join Room</strong> or <strong>Create Room</strong>."]}}
 
         logger.info(f"🔧 ~~~ INFO: AJAX form validated successfully with data: {form.data}")
         return jsonify({"payload": form.data, "success": True})
@@ -40,64 +45,14 @@ def test_ajax():
             if field.errors:
                 return {"errors": {field.name: field.errors}}
 
-    # data = request.json
-    # return jsonify({"message": 'HOWDY, AJAX route is working!', "data": data})
 
 
-
-####
-#### EXAMPLE views.py for voting module
-####
-# from flask import Blueprint, jsonify, request
-
-# from webapp_hamburg_vs_hotdog.database import db
-
-# from webapp_hamburg_vs_hotdog.blueprints.voting.models import Contestant, Matchup, Vote
-# from webapp_hamburg_vs_hotdog.blueprints.voting.utils.get_matchup_stats import get_matchup_stats
-
-# blueprint = Blueprint("voting", __name__)
-
-# @blueprint.route("/on_click_vote/", methods=["POST"])
-# def on_click_vote():
-#     data = request.get_json()
-#     matchup_id = int(data['matchup_id'])
-#     contestant_id = int(data['contestant_id'])
-#     session_id = str(data['session_id'])
-#     # country_code = str(data['country_code'])
-#     # region_code = str(data['region_code'])
-
-#     vote = Vote.query.filter_by(matchup_id=matchup_id, session_id=session_id).first()
-#     contestant_id_name = Contestant.query.get(contestant_id).contestant_name
-
-#     if vote is None:
-#         # 1. Session never Voted: create new vote
-#         vote = Vote(
-#             matchup=matchup_id,
-#             contestant=contestant_id,
-#             session_id=session_id,
-#             country_code="DE",  # TODO: Placeholder, replace with actual country code logic
-#         )
-#         db.session.add(vote)
-#         message = f"Voted for {contestant_id_name}!"
-#     elif vote.contestant_id == contestant_id:
-#         # 2. Session voted for same contestant: remove vote
-#         db.session.delete(vote) 
-#         message = "Vote removed!"
-#     else:
-#         # 3. Session voted for different contestant: switch vote
-#         vote.contestant_id = contestant_id
-#         message = f"Vote switched to {contestant_id_name}!"
-
-#     db.session.commit()
-
-#     matchup_id = Matchup.query.get(matchup_id)
-#     return jsonify(get_matchup_stats(matchup=matchup_id, message=message, session_id=session_id))
-
-
-# @blueprint.route("/api/matchup_stats/", methods=["GET"])
-# def api_matchup_stats():
-#     """Return stats for all matchups as JSON, with optional session_id."""
-#     session_id = request.args.get('session_id')
-#     matchups = Matchup.query.all()
-#     stats = {m.id: get_matchup_stats(m, session_id=session_id) for m in matchups}
-#     return jsonify(stats)
+def build_roomcode(active_rooms=None):
+    import random
+    import string
+    length=4
+    roomcode = ''.join(random.choices(string.ascii_uppercase, k=length))
+    if active_rooms:
+        while roomcode in active_rooms:
+            roomcode = ''.join(random.choices(string.ascii_uppercase, k=length))
+    return roomcode

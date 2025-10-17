@@ -115,6 +115,7 @@ if (registerForm) {
         // ----- Clear previous error messages -----
         document.getElementById("username_error").innerText = "";
         document.getElementById("roomcode_error").innerText = "";
+        document.getElementById("submitType_error").innerHTML = "";
 
         // ----- Gather form data -----
         const formData = new FormData(e.target);
@@ -149,6 +150,9 @@ if (registerForm) {
                 }
                 if (result.errors.roomcode) {
                     document.getElementById("roomcode_error").innerText = result.errors.roomcode.join(", ");
+                }
+                if (result.errors.submitType) {
+                    document.getElementById("submitType_error").innerHTML = result.errors.submitType.join(", ");
                 }
             }
         } catch (error) {
