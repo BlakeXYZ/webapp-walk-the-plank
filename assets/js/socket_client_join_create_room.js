@@ -1,6 +1,18 @@
 import io from 'socket.io-client';
 
+// -----------------------------
+// Debug Logging Utility
+// -----------------------------
+const DEBUG_LOG = true; // Set to false to disable logs
 
+function log(...args) {
+    if (DEBUG_LOG) console.log(...args);
+}
+
+
+// -----------------------------
+// Socket.IO Setup
+// -----------------------------
 const sio = io({
     transports: ['polling', 'websocket'],
     timeout: 10000,
@@ -11,14 +23,14 @@ const sio = io({
     autoConnect: false,
 });
 
-
-
-
 sio.on('connect', () => {
-    console.log('✅ Connected to server, SID:', sio.id);
+    log('✅ Connected to server, SID:', sio.id);
 });
 
 
+// -----------------------------
+// Utility Functions
+// -----------------------------
 function waitForSocketConnection() {
     return new Promise((resolve) => {
         if (sio.connected) resolve();
@@ -28,12 +40,15 @@ function waitForSocketConnection() {
 }
 
 
+// -----------------------------
+// Socket Communication Functions
+// -----------------------------
 function clientEventGetActiveRooms() {
     // Emit event to server with result (callback_function)
     return new Promise((resolve, reject) => {
         if (!sio.connected) return reject(new Error('Socket not connected'));
         sio.emit('client_event_get_active_rooms', {}, (rooms) => {
-            console.log('📤 Sent client_event_get_active_rooms, server responded with:', rooms);
+            log('📤 Sent client_event_get_active_rooms, server responded with:', rooms);
             resolve(rooms);
         });
     });
@@ -44,19 +59,16 @@ function clientEventJoinRoom(username, roomcode) {
     return new Promise((resolve, reject) => {
         if (!sio.connected) return reject(new Error('Socket not connected'));
         sio.emit('client_event_join_room', { username, roomcode }, (response) => {
-            console.log('📤 Sent client_event_join_room, server responded with:', response);
+            log('📤 Sent client_event_join_room, server responded with:', response);
             resolve(response);
         });
     });
 }
 
 
-// Listen for server broadcast updates
-sio.on("server_event_room_update", (data) => {
-    console.log("📡 Room update received:", data);
-    updateRoomInfo(data);
-});
-
+// -----------------------------
+// UI Update Functions
+// -----------------------------
 function updateRoomInfo(data) {
     const roomInfo = document.getElementById("roomInfo");
     roomInfo.innerText = `User Count: ${data.room_user_count}`;
@@ -64,6 +76,20 @@ function updateRoomInfo(data) {
 }
 
 
+// -----------------------------
+// Socket Event Listeners
+// -----------------------------
+
+// Listen for server broadcast updates
+sio.on("server_event_room_update", (data) => {
+    log("📡 Room update received:", data);
+    updateRoomInfo(data);
+});
+
+
+// -----------------------------
+// Room Page Logic
+// -----------------------------
 if (window.location.pathname === "/room/") {
     document.addEventListener("DOMContentLoaded", async () => {
         await waitForSocketConnection();
@@ -71,12 +97,16 @@ if (window.location.pathname === "/room/") {
         const username = document.getElementById("username").value;
         const roomcode = document.getElementById("roomcode").value;
 
-        console.log("========Attempting to join room with username:", username, "and roomcode:", roomcode);
+        log("========Attempting to join room with username:", username, "and roomcode:", roomcode);
         await clientEventJoinRoom(username, roomcode);
 
     });
 }
 
+
+// -----------------------------
+// Register Form Logic
+// -----------------------------
 const registerForm = document.getElementById("registerForm");
 if (registerForm) {
     document.getElementById("registerForm").addEventListener("submit", async (e) => {
@@ -92,18 +122,10 @@ if (registerForm) {
         const submitType = document.activeElement.id;
         payload.submitType = submitType;
 
-
-        //TODO: Query SocketIO Dictionary of Active Rooms
-        // const activeRooms = await sio.emit('get_active_rooms', (rooms) => {
-        //     console.log('Active Rooms:', rooms);
-        //     return rooms;
-        // });
-
-        
         try {
             // ----- Ensure socket connection is established -----
             await waitForSocketConnection();
-            console.log("Socket connected with SID:", sio.id);
+            log("Socket connected with SID:", sio.id);
 
             // ----- Once connected, Get Active Rooms -----
             const activeRooms = await clientEventGetActiveRooms();
@@ -117,11 +139,9 @@ if (registerForm) {
             });
 
             const result = await response.json();
-            console.log("Server Response:", result);
+            log("Server Response:", result);
 
             if (result.success) {
-                document.getElementById("server_response_div").innerText = "Server Response: Success!";
-                //redirect to room page
                 window.location.href = "/room/";
             } else {
                 if (result.errors.username) {
