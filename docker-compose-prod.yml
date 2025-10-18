@@ -1,21 +1,21 @@
 services:
-  db:
-    image: postgres
-    user: postgres
-    volumes:
-      - plank-db-data:/var/lib/postgresql/data
-    networks:
-      - webnet
-    secrets:
-      - plank-db-password
-    environment:
-      - POSTGRES_DB=app
-      - POSTGRES_PASSWORD_FILE=/run/secrets/plank-db-password
-    healthcheck:
-      test: [ "CMD", "pg_isready" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+  # db:
+  #   image: postgres
+  #   user: postgres
+  #   volumes:
+  #     - plank-db-data:/var/lib/postgresql/data
+  #   networks:
+  #     - webnet
+  #   secrets:
+  #     - plank-db-password
+  #   environment:
+  #     - POSTGRES_DB=app
+  #     - POSTGRES_PASSWORD_FILE=/run/secrets/plank-db-password
+  #   healthcheck:
+  #     test: [ "CMD", "pg_isready" ]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
 
   web:
     image: ghcr.io/blakexyz/webapp-walk-the-plank-ghcr:${GIT_COMMIT_HASH:-latest}
@@ -42,12 +42,13 @@ services:
       - BCRYPT_LOG_ROUNDS=13
       - FLASK_DEBUG=0
       - LOG_LEVEL=info
-      - GUNICORN_WORKERS=4
+      - GUNICORN_WORKERS=1
+      - SOCKET_CORS_ORIGINS=https://walktheplank.app,https://www.walktheplank.app
     deploy:
       update_config:
         order: start-first
-    depends_on:
-      - db
+    # depends_on:
+    #   - db
 
   # #connect to: http://{ip_address}:8081
   # to remove, run: - docker service rm ham-stack-deploy_pgadmin
