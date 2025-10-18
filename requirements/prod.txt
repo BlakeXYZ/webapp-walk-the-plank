@@ -38,3 +38,11 @@ Flask-DebugToolbar==0.16.0
 
 # Environment variable parsing
 environs==14.3.0
+
+# Python Flask Socket IO
+Flask-SocketIO==5.3.4
+python-socketio==5.7.2
+python-engineio==4.7.1
+
+
+

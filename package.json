@@ -31,14 +31,16 @@
   "homepage": "https://github.com/BlakeXYZ/my_flask_app#readme",
   "dependencies": {
     "@fortawesome/fontawesome-free": "7.0.0",
+    "@popperjs/core": "2.11.8",
     "bootstrap": "5.3.7",
     "jquery": "3.7.1",
-    "@popperjs/core": "2.11.8"
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
     "@babel/core": "7.28.0",
-    "@babel/preset-env": "7.28.0",
     "@babel/eslint-parser": "7.28.0",
+    "@babel/preset-env": "7.28.0",
     "babel-loader": "10.0.0",
     "chokidar": "4.0.3",
     "concurrently": "9.2.0",

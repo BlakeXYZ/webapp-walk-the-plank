@@ -8,16 +8,16 @@ x-default-volumes: &default_volumes
     - node-modules:/app/node_modules
 
 services:
-  db-dev:
-    image: postgres:16
-    environment:
-      POSTGRES_DB: app
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"
-    volumes:
-      - pg-data:/var/lib/postgresql/data
+  # db-dev:
+  #   image: postgres:16
+  #   environment:
+  #     POSTGRES_DB: app
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: password
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - pg-data:/var/lib/postgresql/data
 
   flask-dev:
     build:
@@ -26,15 +26,24 @@ services:
       args:
         <<: *build_args
     image: "my_flask_app-development"
+    command: >
+      gunicorn 
+      "my_flask_app.app:create_app()" 
+      --bind 0.0.0.0:5000 
+      --workers 1 
+      --worker-class gevent 
+      --reload 
+      --log-level debug
     ports:
       - "8080:5000"
       - "2992:2992"
     environment:
-      FLASK_ENV: development
-      FLASK_DEBUG: 1
-      DATABASE_URL: postgresql://postgres:password@db-dev:5432/app
-    depends_on:
-      - db-dev
+    - FLASK_ENV=development
+    - FLASK_DEBUG=0
+    - DATABASE_URL=postgresql://postgres:password@db-dev:5432/app
+    - SOCKET_CORS_ORIGINS=http://localhost:8080,http://127.0.0.1:8080
+    # depends_on:
+    #   - db-dev
     <<: *default_volumes
 
   pgadmin-dev:
@@ -66,8 +75,9 @@ services:
         <<: *build_args
     entrypoint: flask
     environment:
-      FLASK_ENV: development
-      FLASK_DEBUG: 0
+      - FLASK_ENV=development
+      - FLASK_DEBUG=0
+      - SOCKET_CORS_ORIGINS=*
     image: "my_flask_app-manage"
     stdin_open: true
     tty: true

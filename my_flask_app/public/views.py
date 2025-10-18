@@ -8,6 +8,7 @@ from flask import (
     render_template,
     request,
     url_for,
+    session
 )
 from flask_login import login_required, login_user, logout_user
 
@@ -29,17 +30,8 @@ def load_user(user_id):
 @blueprint.route("/", methods=["GET", "POST"])
 def home():
     """Home page."""
-    form = LoginForm(request.form)
-    current_app.logger.info("Hello from the home page!")
-    # Handle logging in
-    if request.method == "POST":
-        if form.validate_on_submit():
-            login_user(form.user)
-            flash("You are logged in.", "success")
-            redirect_url = request.args.get("next") or url_for("user.members")
-            return redirect(redirect_url)
-        else:
-            flash_errors(form)
+    form = RegisterForm(request.form)
+
     return render_template("public/home.html", form=form)
 
 
@@ -75,3 +67,16 @@ def about():
     """About page."""
     form = LoginForm(request.form)
     return render_template("public/about.html", form=form)
+
+
+@blueprint.route("/room/", methods=["GET", "POST"])
+def room():
+    """Room page."""
+    username = session.get('username')
+    roomcode = session.get('roomcode')
+
+    if not username or not roomcode:
+        flash("You must join or create a room first.", "warning")
+        return redirect(url_for("public.home"))
+        
+    return render_template("public/room.html", username=username, roomcode=roomcode)

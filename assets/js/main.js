@@ -18,3 +18,5 @@ require.context(
 // Your own code
 require("./plugins");
 require("./script");
+require("./socket_client");
+require("./socket_client_join_create_room");

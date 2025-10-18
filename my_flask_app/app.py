@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 """The app module, containing the app factory function."""
+import os
 import logging
 import sys
 
 from flask import Flask, render_template
 
 from my_flask_app import commands, public, user
+from my_flask_app.blueprints import ajax
 from my_flask_app.extensions import (
     bcrypt,
     cache,
@@ -17,6 +19,10 @@ from my_flask_app.extensions import (
     migrate,
 )
 
+import socketio
+from my_flask_app.socketio import sio
+from my_flask_app.socketio.socket_server_events import register_socketio_events
+
 
 def create_app(config_object="my_flask_app.settings"):
     """Create application factory, as explained here: http://flask.pocoo.org/docs/patterns/appfactories/.
@@ -25,12 +31,21 @@ def create_app(config_object="my_flask_app.settings"):
     """
     app = Flask(__name__.split(".")[0])
     app.config.from_object(config_object)
+
+
     register_extensions(app)
     register_blueprints(app)
     register_errorhandlers(app)
     register_shellcontext(app)
     register_commands(app)
     configure_logger(app)
+    
+    register_socketio_events(sio)  # Register Socket.IO events
+    # wrap Flask application with socketio's WSGI application
+    app.wsgi_app = socketio.WSGIApp(
+        sio, 
+        app.wsgi_app
+        )
     return app
 
 
@@ -51,6 +66,8 @@ def register_blueprints(app):
     """Register Flask blueprints."""
     app.register_blueprint(public.views.blueprint)
     app.register_blueprint(user.views.blueprint)
+    app.register_blueprint(ajax.routes.blueprint)  
+    csrf_protect.exempt(ajax.routes.blueprint) 
     return None
 
 
