@@ -7,10 +7,10 @@
 </div>
 <br>
 
-<div class="container d-flex flex-column justify-content-center align-items-center px-5">
+<div class="container d-flex flex-column justify-content-center align-items-center" style="padding: 0px 65px;">
     <h3>Socket.IO Testing</h3>
     
-    <form id="registerForm" class="form form-register w-100" method="POST" action="" role="form">
+    <form id="registerForm" class="form form-register w-100" method="POST" action="" role="form" style="max-width: 300px;">
            {{ form.csrf_token }}
             <div class="form-group mt-2">
                 {{form.username.label}}
