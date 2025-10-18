@@ -42,7 +42,7 @@ services:
       - BCRYPT_LOG_ROUNDS=13
       - FLASK_DEBUG=0
       - LOG_LEVEL=info
-      - GUNICORN_WORKERS=4
+      - GUNICORN_WORKERS=1
       - SOCKET_CORS_ORIGINS=https://walktheplank.app,https://www.walktheplank.app
     deploy:
       update_config:
