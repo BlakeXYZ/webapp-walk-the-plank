@@ -107,8 +107,19 @@ if (window.location.pathname === "/room/") {
 // -----------------------------
 // Register Form Logic
 // -----------------------------
+
 const registerForm = document.getElementById("registerForm");
 if (registerForm) {
+
+    let lastClickedSubmitType = null;
+
+    document.querySelectorAll("#registerForm input[type='submit']").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            lastClickedSubmitType = e.target.id; // "join_room" or "create_room"
+        });
+    });
+
+
     document.getElementById("registerForm").addEventListener("submit", async (e) => {
         e.preventDefault(); // prevent default page reload
 
@@ -120,8 +131,7 @@ if (registerForm) {
         // ----- Gather form data -----
         const formData = new FormData(e.target);
         const payload = Object.fromEntries(formData.entries());
-        const submitType = document.activeElement.id;
-        payload.submitType = submitType;
+        payload.submitType = lastClickedSubmitType; 
 
         try {
             // ----- Ensure socket connection is established -----

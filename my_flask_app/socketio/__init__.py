@@ -8,7 +8,7 @@ allowed_socket_cors_origins_LIST = [origin.strip() for origin in allowed_socket_
 
 sio = socketio.Server(
     async_mode='gevent',
-    cors_allowed_origins=["https://walktheplank.app", "https://www.walktheplank.app"],
+    cors_allowed_origins=allowed_socket_cors_origins_LIST,
     logger=True,
     engineio_logger=True
 )

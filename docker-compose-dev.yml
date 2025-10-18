@@ -8,16 +8,16 @@ x-default-volumes: &default_volumes
     - node-modules:/app/node_modules
 
 services:
-  db-dev:
-    image: postgres:16
-    environment:
-      POSTGRES_DB: app
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"
-    volumes:
-      - pg-data:/var/lib/postgresql/data
+  # db-dev:
+  #   image: postgres:16
+  #   environment:
+  #     POSTGRES_DB: app
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: password
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - pg-data:/var/lib/postgresql/data
 
   flask-dev:
     build:
@@ -42,8 +42,8 @@ services:
     - FLASK_DEBUG=0
     - DATABASE_URL=postgresql://postgres:password@db-dev:5432/app
     - SOCKET_CORS_ORIGINS=http://localhost:8080,http://127.0.0.1:8080
-    depends_on:
-      - db-dev
+    # depends_on:
+    #   - db-dev
     <<: *default_volumes
 
   pgadmin-dev:
