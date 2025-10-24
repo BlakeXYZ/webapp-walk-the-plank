@@ -103,6 +103,35 @@ if (window.location.pathname === "/room/") {
     });
 }
 
+// -----------------------------
+// Join + Create Room Button Opacity enable/disable Logic
+// -----------------------------
+
+const usernameInput = document.getElementById("username");
+const roomcodeInput = document.getElementById("roomcode");
+const joinRoomButton = document.getElementById("join_room");
+const createRoomButton = document.getElementById("create_room");
+
+function updateButtonStates() {
+    const username = usernameInput.value.trim();
+    const roomcode = roomcodeInput.value.trim();
+    const btnEnabled_opacity = "1";
+    const btnDisabled_opacity = "0.25";
+
+    // Enable/disable Join Room button
+    joinRoomButton.style.opacity = (username.length > 0 && roomcode.length > 0) ? btnEnabled_opacity : btnDisabled_opacity;
+
+    // Enable/disable Create Room button
+    createRoomButton.style.opacity = (username.length > 0) ? btnEnabled_opacity : btnDisabled_opacity;
+}
+
+if (joinRoomButton && createRoomButton) {
+
+    document.addEventListener("DOMContentLoaded", (updateButtonStates));
+    usernameInput.addEventListener("input", (updateButtonStates));
+    roomcodeInput.addEventListener("input", (updateButtonStates));
+
+}
 
 // -----------------------------
 // Register Form Logic

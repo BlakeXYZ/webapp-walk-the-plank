@@ -66,3 +66,10 @@ docker ps -a
 # Remove all stopped containers
 docker container prune -f
 
+
+---
+### View service logs
+docker service ls
+docker service logs <service-name>
+docker service logs --since 10m plank-stack_web
+

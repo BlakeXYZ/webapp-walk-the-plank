@@ -2,7 +2,91 @@
    App specific CSS file.
    ========================================================================== */
 
-/* universal */
+   
+/* ======================================
+Bootstrap Overrides 
+====================================== */   
+   
+/*    bg-primary: #E6CD92
+      bg-secondary: #D1B16E
+
+      font-primary: #392313
+      font-secondary: #392313b5;
+
+*/
+
+
+
+
+/* Override Bootstrap border color */
+:root {
+
+  --bg-primary: #E6CD92;
+  --bg-secondary: #D1B16E;
+  --bg-tertiary: #bea163;    
+  --bg-quaternary: #b3975c;   
+
+  --font-primary: #392313;          /* Primary font color */
+  --font-secondary: #392313b5;      /* Secondary font color */
+  --font-tertiary: #392313d4;      /* Tertiary font color */
+  --bs-border-color: var(--bg-secondary);       /* Your desired color */
+  --bs-border-width: 3px;
+
+}
+
+.bg-light {
+  background-color: var(--bg-primary) !important;
+}
+
+.btn {
+  --bs-btn-font-weight: 600; 
+}
+
+.btn-primary {
+  background-color: var(--font-primary);
+  border-color: transparent;
+  color: var(--bg-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--font-secondary);
+  border-color: transparent;
+  color: var(--bg-primary);
+}
+
+.btn-primary:active {
+  background-color: var(--font-tertiary) !important; 
+  border-color: transparent !important;
+  color: var(--bg-primary) !important;
+}
+
+
+/* Override Bootstrap secondary button styles */
+.btn-secondary {
+  background-color: var(--bg-secondary);
+  border-color: transparent;
+  color: var(--font-primary);
+}
+
+.btn-secondary:hover {
+  background-color: var(--bg-quaternary);
+  border-color: transparent;
+  color: var(--font-primary);
+}
+
+
+.btn-secondary:active {
+  background-color: var(--bg-tertiary) !important; 
+  border-color: transparent !important;
+  color: var(--font-primary) !important;
+}
+
+
+    
+/* ======================================
+Universal
+====================================== */   
+
 
 html {
   overflow-y: scroll;
@@ -10,6 +94,7 @@ html {
 
 body {
   padding-top: 60px;
+
 }
 
 section {
@@ -61,13 +146,12 @@ footer {
   margin-top: 400px;
   margin-bottom: 25px;
   padding-top: 5px;
-  border-top: 1px solid #eaeaea;
-  color: #999999;
+  color: var(--font-secondary);
   font-size: small;
 }
 
 footer a {
-  color: #999999;
+  color: var(--font-secondary);
 }
 
 .footer-flex {
