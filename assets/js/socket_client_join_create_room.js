@@ -199,3 +199,13 @@ if (registerForm) {
         }
     });
 }
+
+
+// -----------------------------
+// Handle Mobile page back + forward issue. Force reload on bfcache restore to ensure fresh state.
+// -----------------------------
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted) {
+    window.location.reload();
+  }
+});
