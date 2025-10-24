@@ -20,3 +20,4 @@ require("./plugins");
 require("./script");
 require("./socket_client");
 require("./socket_client_join_create_room");
+require("./socket_client_room_shout");

@@ -23,6 +23,9 @@ const sio = io({
     autoConnect: false,
 });
 
+export default sio;
+
+
 sio.on('connect', () => {
     log('✅ Connected to server, SID:', sio.id);
 });

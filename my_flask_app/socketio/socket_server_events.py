@@ -13,6 +13,52 @@ b_count = 0
 
 room_DICT = {} # Structure: { roomcode1: [ {sid: xxx, username: xxx}, ... ], roomcode2: [ ... ] }
  
+pirate_shouts = [
+    "Ahoy!",
+    "Yarrgh!",
+    "Avast ye Landlubbers!",
+    "Yo ho ho!",
+    "Swab the poop deck!",
+    "Aye Matey!",
+    "Blimey!",
+    "Shiver me timbers!",
+    "Heave ho!",
+    "What’s the Scuttlebutt!",
+    "Raise the Jolly Roger!",
+    "All hands on deck!",
+    "Batten down the hatches!",
+    "Hoist the mainsail!",
+    "Pieces o’ eight!",
+    "Dead men tell no tales!",
+    "Weigh anchor!",
+    "By Blackbeard’s beard!",
+    "Walk the plank!",
+    "Ho ho, haul away!",
+    "Fetch me rum!",
+    "Belay that order!",
+    "Arr, me hearties!",
+    "Scurvy dogs!",
+    "Yo ho, me bucko!",
+    "To the briny deep!",
+    "Thar she blows!",
+    "Keep a weather eye!",
+    "Mark me words!",
+    "A storm’s brewin’!",
+    "Haul wind!",
+    "Sink me!",
+    "Lay to, ye scallywags!",
+    "Splice the mainbrace!",
+    "Man the cannons!",
+    "Blow me down!",
+    "Hold fast!",
+    "A fair wind and a following sea!",
+    "Fire in the hole!",
+    "Heave to!",
+    "Yo ho, hoist yer mug!"
+]
+
+
+
 def register_socketio_events(sio):
     """Register SocketIO event handlers and utilities."""
 # ----------------------------
@@ -37,7 +83,7 @@ def register_socketio_events(sio):
                     del room_DICT[room]
 
             sio.leave_room(sid, room)
-            cleanup_room_DICT()
+            _cleanup_room_DICT()
             server_event_room_update(room)  # Notify others in the room about the update
         
 # ----------------------------
@@ -74,7 +120,7 @@ def register_socketio_events(sio):
             return {"msg": "Already connected."}
 
         room_DICT.setdefault(room, []).append({"sid": sid, "username": username})
-        cleanup_room_DICT()
+        _cleanup_room_DICT()
         sio.enter_room(sid, room)
         server_event_room_update(room)  # Notify others in the room about the update
 
@@ -96,7 +142,7 @@ def register_socketio_events(sio):
             if not room_DICT[room]:
                 del room_DICT[room]
 
-        cleanup_room_DICT()
+        _cleanup_room_DICT()
         sio.leave_room(sid, room)
         server_event_room_update(room)  # Notify others in the room about the update
 
@@ -124,7 +170,7 @@ def register_socketio_events(sio):
 # ----------------------------
 #   Helper Functions
 # ----------------------------
-    def cleanup_room_DICT():
+    def _cleanup_room_DICT():
         # Remove rooms with empty roomcode
         if '' in room_DICT:
             del room_DICT['']
@@ -136,11 +182,18 @@ def register_socketio_events(sio):
                 del room_DICT[room]
 
 
+# ----------------------------
+#   Room Management - Shout, Leave
+# ----------------------------
+        @sio.event
+        def client_event_shout_msg(sid, data):
+            username = data["username"]
+            room = data["roomcode"]
 
+            shout_message = f'{username} shouts, "{random.choice(pirate_shouts)}"'
+            sio.emit('server_event_shout_msg', {'shout_message': shout_message}, to=room)
 
-
-
-
+    
 
 
 

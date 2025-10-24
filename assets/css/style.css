@@ -38,6 +38,10 @@ Bootstrap Overrides
   background-color: var(--bg-primary) !important;
 }
 
+.bg-secondary {
+  background-color: var(--bg-secondary) !important;
+}
+
 .btn {
   --bs-btn-font-weight: 600; 
 }
