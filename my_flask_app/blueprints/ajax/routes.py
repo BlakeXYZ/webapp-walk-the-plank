@@ -35,7 +35,7 @@ def onClick_create_or_join_room():
             session['username'] = form.username.data
             session['roomcode'] = build_roomcode(active_rooms)
         else:
-            return {"errors": {"submitType": ["Please select <strong>Join Room</strong> or <strong>Create Room</strong>."]}}
+            return {"errors": {"submitType": ["Please select Join Room or Create Room."]}}
 
         logger.info(f"🔧 ~~~ INFO: AJAX form validated successfully with data: {form.data}")
         return jsonify({"payload": form.data, "success": True})

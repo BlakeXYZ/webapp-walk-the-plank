@@ -54,18 +54,68 @@ function clientEventJoinRoom(username, roomcode) {
             resolve(response);
         });
     });
+
+    
+}
+
+// -----------------------------
+// UI Init Functions
+// ----------------------------
+
+
+function initRoomHostView(data) {
+    const hostControlsContainer = document.getElementById("hostControlsContainer");
+    hostControlsContainer.innerHTML = `
+        <h5 class="mt-3">Host Controls:</h5>
+        <button type="button" id="startGameBtn" class="btn btn-primary mt-2">Start Game</button>
+    `;
 }
 
 
 // -----------------------------
 // UI Update Functions
 // -----------------------------
-function updateRoomInfo(data) {
-    const roomInfo = document.getElementById("roomInfo");
-    roomInfo.innerText = `User Count: ${data.room_user_count}`;
-    roomInfo.innerText += `\n Users: ${data.room_username_list.join(", ")}`;
-}
+function updateRoomInfoContainerHTML(data) {
+    // pulls data from:     
+    // def server_event_room_update(roomcode):
+    //     update_data = {
+    //         'room_host_username': room_data.get('host_username', None),
+    //         'room_user_count': user_count,
+    //         'room_username_list': [u['username'] for u in room_users]
+    //     }
 
+    const roomInfoContainer = document.getElementById("roomInfoContainer");
+    roomInfoContainer.innerHTML = ""; // Clear previous content
+
+    // Host Info Div
+    const hostInfoDiv = document.createElement("div");
+    hostInfoDiv.id = "hostInfoDiv";
+    hostInfoDiv.textContent = `Host: ${data.room_host_username}`;
+    
+    // User Count Div
+    const roomInfo = document.createElement("div");
+    roomInfo.textContent = `Member Count\n${data.room_user_count}`;
+    roomInfo.id = "roomInfo";
+
+    // User list
+    const usersDiv = document.createElement("div");
+    usersDiv.textContent = "Members:\n";
+    usersDiv.classList.add("mt-1", "mb-1");
+
+    data.room_username_list.forEach(username => {
+        const userSpan = document.createElement("span");
+        userSpan.textContent = username;
+        userSpan.classList.add("badge", "bg-secondary", "me-1");
+        usersDiv.appendChild(userSpan);
+    });
+    
+    
+    roomInfoContainer.appendChild(hostInfoDiv);
+    roomInfoContainer.appendChild(roomInfo);
+    roomInfoContainer.appendChild(usersDiv);
+
+
+}
 
 // -----------------------------
 // Socket Event Listeners
@@ -74,7 +124,7 @@ function updateRoomInfo(data) {
 // Listen for server broadcast updates
 sio.on("server_event_room_update", (data) => {
     log("📡 Room update received:", data);
-    updateRoomInfo(data);
+    updateRoomInfoContainerHTML(data);
 });
 
 
@@ -89,7 +139,12 @@ if (window.location.pathname === "/room/") {
         const roomcode = document.getElementById("roomcode").value;
 
         log("========Attempting to join room with username:", username, "and roomcode:", roomcode);
-        await clientEventJoinRoom(username, roomcode);
+        
+        
+        const response = await clientEventJoinRoom(username, roomcode);
+        if (username == response.data.host_username) {
+            initRoomHostView(response.data);
+        }
 
     });
 }

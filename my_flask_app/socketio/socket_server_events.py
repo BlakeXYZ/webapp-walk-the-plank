@@ -13,11 +13,19 @@ client_count = 0
 a_count = 0
 b_count = 0
 
-room_DICT = {} # Structure: { roomcode1: [ {sid: xxx, username: xxx}, ... ], roomcode2: [ ... ] }
- 
+room_DICT = {} 
 
+'''
+Structure:
+room_DICT = {
+    "roomcode_ABCD": {
+        "host_username": "player1",
+        "room_users": [
+            {"sid": "xxx", "username": "player1"},
+            {"sid": "yyy", "username": "player2"}
+        ]}
 
-
+'''
 
 def register_socketio_events(sio):
     """Register SocketIO event handlers and utilities."""
@@ -37,11 +45,7 @@ def register_socketio_events(sio):
             if room == sid:
                 continue  # Skip individual client room
 
-            if room in room_DICT:
-                room_DICT[room] = [u for u in room_DICT[room] if u["sid"] != sid]
-                if not room_DICT[room]:
-                    del room_DICT[room]
-
+            _remove_user_from_room(room, sid)
             sio.leave_room(sid, room)
             _cleanup_room_DICT()
             server_event_room_update(room)  # Notify others in the room about the update
@@ -75,19 +79,23 @@ def register_socketio_events(sio):
         room = data["roomcode"]
 
         # Prevent duplicates
-        if any(u["username"] == username for u in room_DICT.get(room, [])):
+        if any(u["username"] == username for u in room_DICT.get(room, {}).get("room_users", [])):
             server_event_room_update(room)  # Notify others in the room about the update
             return {"msg": "Already connected."}
+        
+        # if room not in room_DICT, set joining user as host
+        if room not in room_DICT:
+            room_DICT[room] = {"host_username": username, "room_users": []}            
 
-        room_DICT.setdefault(room, []).append({"sid": sid, "username": username})
+        room_DICT.setdefault(room, {"room_users": []})["room_users"].append({"sid": sid, "username": username})
         _cleanup_room_DICT()
         sio.enter_room(sid, room)
         server_event_room_update(room)  # Notify others in the room about the update
 
         logger.info(f"🔧 +++++++++++++++ {username} ({sid}) joined room: {room}")
-        logger.info(f"🔧 +++++++++++++++ connected_users_DICT: {room_DICT}")
+        logger.info(f"🔧 +++++++++++++++ connected room_DICT: {room_DICT}")
 
-        return {"msg": f"Joined room: {room}"}
+        return {"data": room_DICT[room]}
 
 # ----------------------------
 #   LEAVE ROOM
@@ -97,17 +105,13 @@ def register_socketio_events(sio):
         username = data["username"]
         room = data["roomcode"]
 
-        if room in room_DICT:
-            room_DICT[room] = [u for u in room_DICT[room] if u["sid"] != sid]
-            if not room_DICT[room]:
-                del room_DICT[room]
-
+        _remove_user_from_room(room, sid)
         _cleanup_room_DICT()
         sio.leave_room(sid, room)
         server_event_room_update(room)  # Notify others in the room about the update
 
         logger.info(f"🔧 --------------- {username} ({sid}) left room: {room}")
-        logger.info(f"🔧 --------------- connected_users_DICT: {room_DICT}")
+        logger.info(f"🔧 --------------- connected room_DICT: {room_DICT}")
 
         return {"msg": f"Left room: {room}"}
 
@@ -116,12 +120,15 @@ def register_socketio_events(sio):
 # ----------------------------
     @sio.event
     def server_event_room_update(roomcode):
-        room_members = room_DICT.get(roomcode, [])
-        user_count = len(room_members)
+        room_data = room_DICT.get(roomcode, [])
+        room_users = room_data.get('room_users', [])
+        user_count = len(room_users)
+        host_name = room_data.get('host_sid', None)
 
         update_data = {
+            'room_host_username': room_data.get('host_username', None),
             'room_user_count': user_count,
-            'room_username_list': [u['username'] for u in room_members]
+            'room_username_list': [u['username'] for u in room_users]
         }
 
         logger.info(f"🔧 Emitting room update for {roomcode}: {update_data}")
@@ -135,12 +142,21 @@ def register_socketio_events(sio):
         if '' in room_DICT:
             del room_DICT['']
         # Remove users with empty username
-        for room, users in list(room_DICT.items()):
-            room_DICT[room] = [u for u in users if u['username']]
+        for room, data in list(room_DICT.items()):
+            data["room_users"] = [u for u in data["room_users"] if u['username']]
             # Remove room if now empty
-            if not room_DICT[room]:
+            if not data["room_users"]:
                 del room_DICT[room]
 
+
+    def _remove_user_from_room(room, sid):
+        """Remove a user from a room by their session ID."""
+        if room in room_DICT:
+            room_data = room_DICT[room]
+            room_DICT[room]["room_users"] = [u for u in room_data["room_users"] if u["sid"] != sid]
+            # Remove room if "room_users" is now empty
+            if not room_DICT[room]["room_users"]:
+                del room_DICT[room]
 
 # ----------------------------
 #   Room Management - Shout, Leave

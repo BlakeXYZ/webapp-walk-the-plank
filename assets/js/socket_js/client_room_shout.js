@@ -69,7 +69,7 @@ function clientEventShoutMsg(username, roomcode) {
 
 // Listen for server broadcast updates
 sio.on("server_event_shout_msg", (data) => {
-    log("📡 Room update received:", data);
+    log("📡 server_event_shout_msg update received:", data);
     updateShoutMsgList(data.shout_message);
 });
 
