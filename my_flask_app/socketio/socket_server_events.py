@@ -7,12 +7,18 @@ from my_flask_app import user
 import socketio
 from . import sio
 
+from my_flask_app.data.game_data import pirate_shouts_LIST
+
 client_count = 0
 a_count = 0
 b_count = 0
 
 room_DICT = {} # Structure: { roomcode1: [ {sid: xxx, username: xxx}, ... ], roomcode2: [ ... ] }
  
+
+
+
+
 def register_socketio_events(sio):
     """Register SocketIO event handlers and utilities."""
 # ----------------------------
@@ -37,7 +43,7 @@ def register_socketio_events(sio):
                     del room_DICT[room]
 
             sio.leave_room(sid, room)
-            cleanup_room_DICT()
+            _cleanup_room_DICT()
             server_event_room_update(room)  # Notify others in the room about the update
         
 # ----------------------------
@@ -74,7 +80,7 @@ def register_socketio_events(sio):
             return {"msg": "Already connected."}
 
         room_DICT.setdefault(room, []).append({"sid": sid, "username": username})
-        cleanup_room_DICT()
+        _cleanup_room_DICT()
         sio.enter_room(sid, room)
         server_event_room_update(room)  # Notify others in the room about the update
 
@@ -96,7 +102,7 @@ def register_socketio_events(sio):
             if not room_DICT[room]:
                 del room_DICT[room]
 
-        cleanup_room_DICT()
+        _cleanup_room_DICT()
         sio.leave_room(sid, room)
         server_event_room_update(room)  # Notify others in the room about the update
 
@@ -124,7 +130,7 @@ def register_socketio_events(sio):
 # ----------------------------
 #   Helper Functions
 # ----------------------------
-    def cleanup_room_DICT():
+    def _cleanup_room_DICT():
         # Remove rooms with empty roomcode
         if '' in room_DICT:
             del room_DICT['']
@@ -136,11 +142,18 @@ def register_socketio_events(sio):
                 del room_DICT[room]
 
 
+# ----------------------------
+#   Room Management - Shout, Leave
+# ----------------------------
+        @sio.event
+        def client_event_shout_msg(sid, data):
+            username = data["username"]
+            room = data["roomcode"]
 
+            shout_message = f'{username} shouts, "{random.choice(pirate_shouts_LIST)}"'
+            sio.emit('server_event_shout_msg', {'shout_message': shout_message}, to=room)
 
-
-
-
+    
 
 
 

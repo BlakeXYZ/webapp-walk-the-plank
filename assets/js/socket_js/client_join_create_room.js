@@ -1,4 +1,5 @@
 import io from 'socket.io-client';
+import sio from './client_init.js';
 
 // -----------------------------
 // Debug Logging Utility
@@ -10,18 +11,8 @@ function log(...args) {
 }
 
 
-// -----------------------------
-// Socket.IO Setup
-// -----------------------------
-const sio = io({
-    transports: ['polling', 'websocket'],
-    timeout: 10000,
-    reconnection: true,
-    reconnectionAttempts: 3,
-    reconnectionDelay: 2000,
-    forceNew: true,  // Force new connection
-    autoConnect: false,
-});
+
+
 
 sio.on('connect', () => {
     log('✅ Connected to server, SID:', sio.id);
@@ -172,7 +163,7 @@ if (registerForm) {
             payload.activeRooms = activeRooms;
 
             // ----- Send AJAX request to server -----
-            const response = await fetch('/ajax/test_ajax', {
+            const response = await fetch('/ajax/onClick_create_or_join_room', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(payload),

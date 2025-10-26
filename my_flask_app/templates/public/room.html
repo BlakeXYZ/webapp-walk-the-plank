@@ -6,10 +6,16 @@
 <input type="hidden" id="username" value="{{ username }}">
 <input type="hidden" id="roomcode" value="{{ roomcode }}">
 
-<div class="container">
+<div class="container d-flex flex-column justify-content-center align-items-center gap-1" style="padding: 0px 65px;">
     <h1 class="mt-5">Room {{ roomcode }}</h1>
+        <br>
     <h3>Welcome {{ username }} to room {{ roomcode }}</h3>
+        <br>
     <div id="roomInfo">----</div>
+    <br>
+    <div id="shoutMsgList" class="overflow-auto bg-secondary rounded p-2 w-100" style="max-height: 200px; min-height: 200px; max-width: 300px;"></div>
+    <br>
+    <button type="button" id="shoutMsgBtn" class="btn btn-secondary">Send a Shout</button>
 </div>
 <br>
 <br>

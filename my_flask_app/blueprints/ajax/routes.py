@@ -12,8 +12,8 @@ def create_lobby():
     # Handle lobby creation logic here
     return jsonify({"status": "success", "data": data}), 201
 
-@blueprint.route('/test_ajax', methods=['POST'])
-def test_ajax():
+@blueprint.route('/onClick_create_or_join_room', methods=['POST'])
+def onClick_create_or_join_room():
     data = request.json
     active_rooms = data.get('activeRooms', [])
     form = RegisterForm(data=data, activeRooms=active_rooms)
