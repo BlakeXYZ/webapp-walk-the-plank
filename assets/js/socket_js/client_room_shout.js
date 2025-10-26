@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import sio from './socket_client_join_create_room.js';
+import sio from './client_init.js';
 
 
 

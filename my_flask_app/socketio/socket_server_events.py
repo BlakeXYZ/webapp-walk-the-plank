@@ -7,55 +7,15 @@ from my_flask_app import user
 import socketio
 from . import sio
 
+from my_flask_app.data.game_data import pirate_shouts_LIST
+
 client_count = 0
 a_count = 0
 b_count = 0
 
 room_DICT = {} # Structure: { roomcode1: [ {sid: xxx, username: xxx}, ... ], roomcode2: [ ... ] }
  
-pirate_shouts = [
-    "Ahoy!",
-    "Yarrgh!",
-    "Avast ye Landlubbers!",
-    "Yo ho ho!",
-    "Swab the poop deck!",
-    "Aye Matey!",
-    "Blimey!",
-    "Shiver me timbers!",
-    "Heave ho!",
-    "What’s the Scuttlebutt!",
-    "Raise the Jolly Roger!",
-    "All hands on deck!",
-    "Batten down the hatches!",
-    "Hoist the mainsail!",
-    "Pieces o’ eight!",
-    "Dead men tell no tales!",
-    "Weigh anchor!",
-    "By Blackbeard’s beard!",
-    "Walk the plank!",
-    "Ho ho, haul away!",
-    "Fetch me rum!",
-    "Belay that order!",
-    "Arr, me hearties!",
-    "Scurvy dogs!",
-    "Yo ho, me bucko!",
-    "To the briny deep!",
-    "Thar she blows!",
-    "Keep a weather eye!",
-    "Mark me words!",
-    "A storm’s brewin’!",
-    "Haul wind!",
-    "Sink me!",
-    "Lay to, ye scallywags!",
-    "Splice the mainbrace!",
-    "Man the cannons!",
-    "Blow me down!",
-    "Hold fast!",
-    "A fair wind and a following sea!",
-    "Fire in the hole!",
-    "Heave to!",
-    "Yo ho, hoist yer mug!"
-]
+
 
 
 
@@ -190,7 +150,7 @@ def register_socketio_events(sio):
             username = data["username"]
             room = data["roomcode"]
 
-            shout_message = f'{username} shouts, "{random.choice(pirate_shouts)}"'
+            shout_message = f'{username} shouts, "{random.choice(pirate_shouts_LIST)}"'
             sio.emit('server_event_shout_msg', {'shout_message': shout_message}, to=room)
 
     

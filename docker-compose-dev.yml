@@ -46,19 +46,19 @@ services:
     #   - db-dev
     <<: *default_volumes
 
-  pgadmin-dev:
-    image: dpage/pgadmin4:latest
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-    ports:
-      - "8081:80"
-    networks:
-      - default
-    depends_on:
-      - flask-dev
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
+  # pgadmin-dev:
+  #   image: dpage/pgadmin4:latest
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@example.com
+  #     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+  #   ports:
+  #     - "8081:80"
+  #   networks:
+  #     - default
+  #   depends_on:
+  #     - flask-dev
+  #   volumes:
+  #     - pgadmin-data:/var/lib/pgadmin
 
 
   # manage service for running Flask commands
