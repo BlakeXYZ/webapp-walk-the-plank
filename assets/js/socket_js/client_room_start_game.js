@@ -1,5 +1,8 @@
 import io from 'socket.io-client';
-import sio from './client_init.js';
+import sio from './_client_init.js';
+
+import { clientEventGetRoomData } from './client_join_create_room.js';
+import { ROOM_USER_COUNT_TO_START_GAME } from './_client_init.js';
 
 
 
@@ -13,8 +16,7 @@ function log(...args) {
 }
 
 
-
-
+// Now you can use it:
 const hostControlsContainer = document.getElementById("hostControlsContainer");
 if (hostControlsContainer) {
     hostControlsContainer.addEventListener("click", async (e) => {
@@ -25,14 +27,44 @@ if (hostControlsContainer) {
             const roomcode = document.getElementById("roomcode").value;
             log("===== Start Game button clicked by:", username, "in room:", roomcode);
 
-            // Your start game logic here
+            // ----- Clear previous error messages -----
+            document.getElementById("startGameBtn_error").innerText = "";
+
+            // ----- Get active room data -----
+            const activeRoomData = await clientEventGetRoomData(roomcode);
+
+            // ----- Prepare payload -----
+            const payload = activeRoomData;
+            payload.room_user_count_to_start_game = ROOM_USER_COUNT_TO_START_GAME;
+
+            try {
+                // ----- Send AJAX request to server -----
+                const response = await fetch('/ajax/onClick_start_game', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // window.location.href = "/room/";
+                } else {
+                    if (result.errors) {
+                        document.getElementById("startGameBtn_error").innerText = result.errors.join(", ");
+                    }
+                }
+
+            } catch (error) {
+                console.error("Error sending payload:", error);
+        
+            }
         }
     });
 } else {
     log("hostControlsContainer not found.");
 }
 
-//else start game button not found
 
 
 

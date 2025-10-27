@@ -1,5 +1,9 @@
 import io from 'socket.io-client';
 
+
+export const ROOM_USER_COUNT_TO_START_GAME = 3;
+
+
 // -----------------------------
 // Socket.IO Setup
 // -----------------------------

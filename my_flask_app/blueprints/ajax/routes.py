@@ -46,7 +46,6 @@ def onClick_create_or_join_room():
                 return {"errors": {field.name: field.errors}}
 
 
-
 def build_roomcode(active_rooms=None):
     import random
     import string
@@ -56,3 +55,21 @@ def build_roomcode(active_rooms=None):
         while roomcode in active_rooms:
             roomcode = ''.join(random.choices(string.ascii_uppercase, k=length))
     return roomcode
+
+
+@blueprint.route('/onClick_start_game', methods=['POST'])
+def onClick_start_game():
+    data = request.json
+    room_users = data.get('room_users')
+    room_user_count = len(room_users) if room_users else 0
+    room_user_count_to_start_game = data.get('room_user_count_to_start_game', 3)
+
+    logger.debug(f"🛠️ DEBUG: ------------ onClick_start_game received data: {data}")
+
+    # Add your start game logic here
+    # For example, validate the user and room, then start the game
+
+    if room_user_count < room_user_count_to_start_game:
+        return jsonify({"status": "error", "errors": [f"At least {room_user_count_to_start_game} players are required to start the game."]})
+
+    return jsonify({"status": "success", "message": f"Game started with {room_user_count} users."})

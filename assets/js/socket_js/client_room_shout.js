@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import sio from './client_init.js';
+import sio from './_client_init.js';
 
 
 

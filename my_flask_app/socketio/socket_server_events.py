@@ -71,6 +71,27 @@ def register_socketio_events(sio):
         return active_rooms
     
 # ----------------------------
+#   GET ROOM DATA
+# ----------------------------
+    @sio.event
+    def client_event_get_room_data(sid, data):
+        """
+        Event Handler for 'client_event_get_room_data'
+
+        returns:
+        - List of active room names.
+        """
+        logger.info(f"🔧 Received client_event_get_room_data from {sid}")
+
+    
+
+
+        return room_DICT.get(data.get("roomcode"), {})
+
+
+
+
+# ----------------------------
 #   JOIN ROOM
 # ----------------------------
     @sio.event
@@ -125,11 +146,13 @@ def register_socketio_events(sio):
         user_count = len(room_users)
         host_name = room_data.get('host_sid', None)
 
-        update_data = {
-            'room_host_username': room_data.get('host_username', None),
-            'room_user_count': user_count,
-            'room_username_list': [u['username'] for u in room_users]
-        }
+        # update_data = {
+        #     'room_host_username': room_data.get('host_username', None),
+        #     'room_user_count': user_count,
+        #     'room_username_list': [u['username'] for u in room_users]
+        # }
+
+        update_data = room_data.copy()
 
         logger.info(f"🔧 Emitting room update for {roomcode}: {update_data}")
         sio.emit('server_event_room_update', update_data, to=roomcode)

@@ -18,7 +18,8 @@ require.context(
 // Your own code
 require("./plugins");
 require("./script");
-require("./socket_js/client_init");
+require("./socket_js/_client_init");
 require("./socket_js/client_join_create_room");
+require("./socket_js/_client_room_html");
 require("./socket_js/client_room_shout");
 require("./socket_js/client_room_start_game");

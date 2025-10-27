@@ -1,5 +1,7 @@
 import io from 'socket.io-client';
-import sio from './client_init.js';
+import sio from './_client_init.js';
+
+import { initRoomHostViewHTML, updateRoomInfoContainerHTML, updateStartGameOpacityHTML } from './_client_room_html.js';
 
 // -----------------------------
 // Debug Logging Utility
@@ -34,13 +36,24 @@ function waitForSocketConnection() {
 // -----------------------------
 // Socket Communication Functions
 // -----------------------------
-function clientEventGetActiveRooms() {
+export function clientEventGetActiveRooms() {
     // Emit event to server with result (callback_function)
     return new Promise((resolve, reject) => {
         if (!sio.connected) return reject(new Error('Socket not connected'));
         sio.emit('client_event_get_active_rooms', {}, (rooms) => {
             log('📤 Sent client_event_get_active_rooms, server responded with:', rooms);
             resolve(rooms);
+        });
+    });
+}
+
+export function clientEventGetRoomData(roomcode) {
+    // Emit event to server with result (callback_function)
+    return new Promise((resolve, reject) => {
+        if (!sio.connected) return reject(new Error('Socket not connected'));
+        sio.emit('client_event_get_room_data', { roomcode }, (roomData) => {
+            log('📤 Sent client_event_get_room_data, server responded with:', roomData);
+            resolve(roomData);
         });
     });
 }
@@ -58,64 +71,6 @@ function clientEventJoinRoom(username, roomcode) {
     
 }
 
-// -----------------------------
-// UI Init Functions
-// ----------------------------
-
-
-function initRoomHostView(data) {
-    const hostControlsContainer = document.getElementById("hostControlsContainer");
-    hostControlsContainer.innerHTML = `
-        <h5 class="mt-3">Host Controls:</h5>
-        <button type="button" id="startGameBtn" class="btn btn-primary mt-2">Start Game</button>
-    `;
-}
-
-
-// -----------------------------
-// UI Update Functions
-// -----------------------------
-function updateRoomInfoContainerHTML(data) {
-    // pulls data from:     
-    // def server_event_room_update(roomcode):
-    //     update_data = {
-    //         'room_host_username': room_data.get('host_username', None),
-    //         'room_user_count': user_count,
-    //         'room_username_list': [u['username'] for u in room_users]
-    //     }
-
-    const roomInfoContainer = document.getElementById("roomInfoContainer");
-    roomInfoContainer.innerHTML = ""; // Clear previous content
-
-    // Host Info Div
-    const hostInfoDiv = document.createElement("div");
-    hostInfoDiv.id = "hostInfoDiv";
-    hostInfoDiv.textContent = `Host: ${data.room_host_username}`;
-    
-    // User Count Div
-    const roomInfo = document.createElement("div");
-    roomInfo.textContent = `Member Count\n${data.room_user_count}`;
-    roomInfo.id = "roomInfo";
-
-    // User list
-    const usersDiv = document.createElement("div");
-    usersDiv.textContent = "Members:\n";
-    usersDiv.classList.add("mt-1", "mb-1");
-
-    data.room_username_list.forEach(username => {
-        const userSpan = document.createElement("span");
-        userSpan.textContent = username;
-        userSpan.classList.add("badge", "bg-secondary", "me-1");
-        usersDiv.appendChild(userSpan);
-    });
-    
-    
-    roomInfoContainer.appendChild(hostInfoDiv);
-    roomInfoContainer.appendChild(roomInfo);
-    roomInfoContainer.appendChild(usersDiv);
-
-
-}
 
 // -----------------------------
 // Socket Event Listeners
@@ -125,6 +80,7 @@ function updateRoomInfoContainerHTML(data) {
 sio.on("server_event_room_update", (data) => {
     log("📡 Room update received:", data);
     updateRoomInfoContainerHTML(data);
+    updateStartGameOpacityHTML(data);
 });
 
 
@@ -143,7 +99,8 @@ if (window.location.pathname === "/room/") {
         
         const response = await clientEventJoinRoom(username, roomcode);
         if (username == response.data.host_username) {
-            initRoomHostView(response.data);
+            initRoomHostViewHTML(response.data);
+            updateStartGameOpacityHTML(response.data);
         }
 
     });
