@@ -1,4 +1,6 @@
-import { ROOM_USER_COUNT_TO_START_GAME, DISABLED_BTN_OPACITY } from './_constants.js';
+import { ROOM_USER_COUNT_TO_START_GAME, 
+        ROOM_USER_MAX_COUNT, 
+        DISABLED_BTN_OPACITY } from './_constants.js';
 
 /**
  * @param {Object} data - {
@@ -12,8 +14,6 @@ import { ROOM_USER_COUNT_TO_START_GAME, DISABLED_BTN_OPACITY } from './_constant
 // -----------------------------
 // UI Init Functions
 // ----------------------------
-
-
 export function initRoomHostViewHTML() {
     const hostControlsContainer = document.getElementById("hostControlsContainer");
     hostControlsContainer.innerHTML = `
@@ -25,41 +25,61 @@ export function initRoomHostViewHTML() {
 
 
 // -----------------------------
-// UI Update Functions
+// UI Update - Room Info
 // -----------------------------
 export function updateRoomInfoContainerHTML(data) {
     const room_user_count = data.room_users.length;
     const usernames = data.room_users.map(user => user.username);
-
     const roomInfoContainer = document.getElementById("roomInfoContainer");
-    roomInfoContainer.innerHTML = ""; // Clear previous content
 
-    // Host Info Div
-    const hostInfoDiv = document.createElement("div");
-    hostInfoDiv.id = "hostInfoDiv";
-    hostInfoDiv.textContent = `Host: ${data.host_username}`;
-    
-    // User Count Div
-    const roomInfoDiv = document.createElement("div");
-    roomInfoDiv.textContent = `Player Count:\n${room_user_count}`;
-    roomInfoDiv.id = "roomInfoDiv";
+    // Clear previous content
+    roomInfoContainer.innerHTML = "";
+
+    // User Header
+    const userHeader = document.createElement("h5");
+    userHeader.textContent = `Players (${room_user_count}/${ROOM_USER_MAX_COUNT}):`;
+    userHeader.classList.add("fw-bold", "fs-6", "mb-3");
 
     // User list
-    const usersDiv = document.createElement("div");
-    usersDiv.textContent = "Players:\n";
-    usersDiv.classList.add("mt-1", "mb-1");
+    const userListContainer = document.createElement("div");
+    userListContainer.id = "userListContainer";
+    userListContainer.classList.add("d-flex", "flex-column", "gap-2");
 
     usernames.forEach(username => {
-        const userSpan = document.createElement("span");
-        userSpan.textContent = username;
-        userSpan.classList.add("badge", "bg-secondary", "me-1");
-        usersDiv.appendChild(userSpan);
+        const usernameDiv = document.createElement("div");
+        usernameDiv.classList.add("bg-tertiary", "d-flex", "align-items-center", "justify-between", "p-2", "rounded");
+        usernameDiv.textContent = username;
+
+        // If username == host, add host text
+        if (username === data.host_username) {
+            const hostBadge = document.createElement("div");
+            hostBadge.textContent = "☆ Host";
+            hostBadge.classList.add("fs-8", "ms-auto");
+            usernameDiv.appendChild(hostBadge);
+        }
+
+
+        // // if username == host, add special badge
+        // if (username === data.host_username) {
+        //     userSpan.classList.add("badge", "bg-warning", "px-2");
+        //     userSpan.textContent = `${username} (Host)`;
+        // } else {
+        //     userSpan.textContent = username;
+        //     userSpan.classList.add("badge", "bg-secondary", "px-2");
+        // }
+
+
+
+
+        userListContainer.appendChild(usernameDiv);
     });
     
-    
-    roomInfoContainer.appendChild(hostInfoDiv);
-    roomInfoContainer.appendChild(roomInfoDiv);
-    roomInfoContainer.appendChild(usersDiv);
+
+    roomInfoContainer.prepend(userHeader);
+    roomInfoContainer.appendChild(userListContainer);
+
+
+
 
 
 }
@@ -68,8 +88,6 @@ export function updateRoomInfoContainerHTML(data) {
 // -----------------------------
 // Start Game Button Opacity enable/disable Logic
 // -----------------------------
-
-
 export function updateStartGameOpacityHTML(data) {
     const room_user_count = data.room_users.length;
     const startGameBtn = document.getElementById("startGameBtn");
@@ -80,3 +98,22 @@ export function updateStartGameOpacityHTML(data) {
         startGameBtn.style.opacity = (room_user_count < ROOM_USER_COUNT_TO_START_GAME) ? btnDisabled_opacity : btnEnabled_opacity;
     }
 }
+
+
+// -----------------------------
+// UI Update - Shout Message
+// -----------------------------
+export function updateShoutMsgList(msg) {
+    const shoutMsgList = document.getElementById("shoutMsgList");
+    
+    // Append new message with newline if not empty
+    if (shoutMsgList.innerText.trim().length > 0) {
+        shoutMsgList.innerText += `\n${msg}`;
+    } else {
+        shoutMsgList.innerText = msg;
+    }
+
+    // Auto-scroll to bottom
+    shoutMsgList.scrollTop = shoutMsgList.scrollHeight;
+}
+

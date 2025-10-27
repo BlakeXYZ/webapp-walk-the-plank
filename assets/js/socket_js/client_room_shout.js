@@ -1,6 +1,8 @@
 import io from 'socket.io-client';
 import sio from './_client_init.js';
 
+import { updateShoutMsgList } from './_client_room_html.js';
+
 
 
 // -----------------------------
@@ -21,34 +23,10 @@ if (shoutMsgBtn) {
         const username = document.getElementById("username").value;
         const roomcode = document.getElementById("roomcode").value;
 
-        const shoutMessage = `Shout from ${username} in room ${roomcode} at ${new Date().toLocaleTimeString()}`;
-
-        log("===== Sending shout message:", shoutMessage);
         await clientEventShoutMsg(username, roomcode);
 
     });
 }
-
-
-
-
-// -----------------------------
-// UI Update Functions
-// -----------------------------
-function updateShoutMsgList(msg) {
-    const shoutMsgList = document.getElementById("shoutMsgList");
-    
-    // Append new message with newline if not empty
-    if (shoutMsgList.innerText.trim().length > 0) {
-        shoutMsgList.innerText += `\n${msg}`;
-    } else {
-        shoutMsgList.innerText = msg;
-    }
-
-    // Auto-scroll to bottom
-    shoutMsgList.scrollTop = shoutMsgList.scrollHeight;
-}
-
 
 
 function clientEventShoutMsg(username, roomcode) {

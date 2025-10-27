@@ -13,10 +13,6 @@ function log(...args) {
     if (DEBUG_LOG) console.log(...args);
 }
 
-
-
-
-
 sio.on('connect', () => {
     log('✅ Connected to server, SID:', sio.id);
 });

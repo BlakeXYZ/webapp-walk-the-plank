@@ -32,6 +32,9 @@ Bootstrap Overrides
   --bs-border-color: var(--bg-secondary);       /* Your desired color */
   --bs-border-width: 3px;
 
+  --bs-body-color: var(--font-primary);
+
+
 }
 
 .bg-light {
@@ -41,6 +44,15 @@ Bootstrap Overrides
 .bg-secondary {
   background-color: var(--bg-secondary) !important;
 }
+
+.bg-tertiary {
+  background-color: var(--bg-tertiary) !important;
+}
+
+.bg-quaternary {
+  background-color: var(--bg-quaternary) !important;
+}
+
 
 .btn {
   --bs-btn-font-weight: 600; 
@@ -92,6 +104,15 @@ Bootstrap Overrides
     /* or use lowercase: text-transform: lowercase; */
 }
 
+
+/* Font Sizes */
+.fs-7 {
+  font-size: 0.85rem !important; 
+}
+
+.fs-8{
+  font-size: 0.75rem !important; 
+}
     
 /* ======================================
 Universal
@@ -104,6 +125,7 @@ html {
 
 body {
   padding-top: 60px;
+  color: var(--font-primary);
 
 }
 
