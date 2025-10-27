@@ -1,4 +1,13 @@
-import { ROOM_USER_COUNT_TO_START_GAME, DISABLED_BTN_OPACITY } from './_client_init.js';
+import { ROOM_USER_COUNT_TO_START_GAME, DISABLED_BTN_OPACITY } from './_constants.js';
+
+/**
+ * @param {Object} data - {
+ *   host_username: string,
+ *   room_users: Array<{ sid: string, username: string }>
+ * }
+ */
+
+
 
 // -----------------------------
 // UI Init Functions

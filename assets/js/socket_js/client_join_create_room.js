@@ -1,7 +1,7 @@
 import io from 'socket.io-client';
 import sio from './_client_init.js';
 
-import { DISABLED_BTN_OPACITY } from './_client_init.js';
+import { DISABLED_BTN_OPACITY } from './_constants.js';
 import { initRoomHostViewHTML, updateRoomInfoContainerHTML, updateStartGameOpacityHTML } from './_client_room_html.js';
 
 // -----------------------------

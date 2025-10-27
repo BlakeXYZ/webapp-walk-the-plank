@@ -1,4 +1,3 @@
-from calendar import c
 import logging
 import random
 logger = logging.getLogger(__name__)
@@ -7,6 +6,7 @@ from my_flask_app import user
 import socketio
 from . import sio
 
+from my_flask_app.data.constants import RoomKeys, UserKeys
 from my_flask_app.data.game_data import pirate_shouts_LIST
 
 client_count = 0
@@ -24,7 +24,15 @@ room_DICT = {
             {"sid": "xxx", "username": "player1"},
             {"sid": "yyy", "username": "player2"}
         ]}
+ 
+(example using Enums)
 
+    "roomcode_ABCD": {
+        RoomKeys.HOST: "player1",
+        RoomKeys.USERS: [
+            {UserKeys.SID: "xxx", UserKeys.USERNAME: "player1"},
+            {UserKeys.SID: "yyy", UserKeys.USERNAME: "player2"}
+        ]}
 '''
 
 def register_socketio_events(sio):
@@ -83,9 +91,6 @@ def register_socketio_events(sio):
         """
         logger.info(f"🔧 Received client_event_get_room_data from {sid}")
 
-    
-
-
         return room_DICT.get(data.get("roomcode"), {})
 
 
@@ -100,15 +105,15 @@ def register_socketio_events(sio):
         room = data["roomcode"]
 
         # Prevent duplicates
-        if any(u["username"] == username for u in room_DICT.get(room, {}).get("room_users", [])):
+        if any(u[UserKeys.USERNAME] == username for u in room_DICT.get(room, {}).get(RoomKeys.USERS, [])):
             server_event_room_update(room)  # Notify others in the room about the update
             return {"msg": "Already connected."}
         
         # if room not in room_DICT, set joining user as host
         if room not in room_DICT:
-            room_DICT[room] = {"host_username": username, "room_users": []}            
+            room_DICT[room] = {RoomKeys.HOST: username, RoomKeys.USERS: []}            
 
-        room_DICT.setdefault(room, {"room_users": []})["room_users"].append({"sid": sid, "username": username})
+        room_DICT.setdefault(room, {RoomKeys.USERS: []})[RoomKeys.USERS].append({UserKeys.SID: sid, UserKeys.USERNAME: username})
         _cleanup_room_DICT()
         sio.enter_room(sid, room)
         server_event_room_update(room)  # Notify others in the room about the update
@@ -142,20 +147,9 @@ def register_socketio_events(sio):
     @sio.event
     def server_event_room_update(roomcode):
         room_data = room_DICT.get(roomcode, [])
-        room_users = room_data.get('room_users', [])
-        user_count = len(room_users)
-        host_name = room_data.get('host_sid', None)
 
-        # update_data = {
-        #     'room_host_username': room_data.get('host_username', None),
-        #     'room_user_count': user_count,
-        #     'room_username_list': [u['username'] for u in room_users]
-        # }
-
-        update_data = room_data.copy()
-
-        logger.info(f"🔧 Emitting room update for {roomcode}: {update_data}")
-        sio.emit('server_event_room_update', update_data, to=roomcode)
+        logger.info(f"🔧 Emitting room update for {roomcode}: {room_data}")
+        sio.emit('server_event_room_update', room_data, to=roomcode)
 
 # ----------------------------
 #   Helper Functions
@@ -166,9 +160,9 @@ def register_socketio_events(sio):
             del room_DICT['']
         # Remove users with empty username
         for room, data in list(room_DICT.items()):
-            data["room_users"] = [u for u in data["room_users"] if u['username']]
+            data[RoomKeys.USERS] = [u for u in data[RoomKeys.USERS] if u[UserKeys.USERNAME]]
             # Remove room if now empty
-            if not data["room_users"]:
+            if not data[RoomKeys.USERS]:
                 del room_DICT[room]
 
 
@@ -176,13 +170,13 @@ def register_socketio_events(sio):
         """Remove a user from a room by their session ID."""
         if room in room_DICT:
             room_data = room_DICT[room]
-            room_DICT[room]["room_users"] = [u for u in room_data["room_users"] if u["sid"] != sid]
+            room_DICT[room][RoomKeys.USERS] = [u for u in room_data[RoomKeys.USERS] if u[UserKeys.SID] != sid]
             # Remove room if "room_users" is now empty
-            if not room_DICT[room]["room_users"]:
+            if not room_DICT[room][RoomKeys.USERS]:
                 del room_DICT[room]
 
 # ----------------------------
-#   Room Management - Shout, Leave
+#   Room - Shout Message
 # ----------------------------
         @sio.event
         def client_event_shout_msg(sid, data):

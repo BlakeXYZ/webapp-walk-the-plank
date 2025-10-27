@@ -2,7 +2,7 @@ import io from 'socket.io-client';
 import sio from './_client_init.js';
 
 import { clientEventGetRoomData } from './client_join_create_room.js';
-import { ROOM_USER_COUNT_TO_START_GAME } from './_client_init.js';
+import { ROOM_USER_COUNT_TO_START_GAME } from './_constants.js';
 
 
 
