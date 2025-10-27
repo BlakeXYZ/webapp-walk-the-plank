@@ -1,4 +1,4 @@
-import { ROOM_USER_COUNT_TO_START_GAME } from './_client_init.js';
+import { ROOM_USER_COUNT_TO_START_GAME, DISABLED_BTN_OPACITY } from './_client_init.js';
 
 // -----------------------------
 // UI Init Functions
@@ -32,12 +32,12 @@ export function updateRoomInfoContainerHTML(data) {
     
     // User Count Div
     const roomInfoDiv = document.createElement("div");
-    roomInfoDiv.textContent = `Member Count\n${room_user_count}`;
+    roomInfoDiv.textContent = `Player Count:\n${room_user_count}`;
     roomInfoDiv.id = "roomInfoDiv";
 
     // User list
     const usersDiv = document.createElement("div");
-    usersDiv.textContent = "Members:\n";
+    usersDiv.textContent = "Players:\n";
     usersDiv.classList.add("mt-1", "mb-1");
 
     usernames.forEach(username => {
@@ -65,7 +65,7 @@ export function updateStartGameOpacityHTML(data) {
     const room_user_count = data.room_users.length;
     const startGameBtn = document.getElementById("startGameBtn");
     const btnEnabled_opacity = "1";
-    const btnDisabled_opacity = "0.25";
+    const btnDisabled_opacity = DISABLED_BTN_OPACITY;
 
     if (startGameBtn) {
         startGameBtn.style.opacity = (room_user_count < ROOM_USER_COUNT_TO_START_GAME) ? btnDisabled_opacity : btnEnabled_opacity;

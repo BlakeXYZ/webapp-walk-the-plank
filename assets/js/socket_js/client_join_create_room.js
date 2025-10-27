@@ -1,6 +1,7 @@
 import io from 'socket.io-client';
 import sio from './_client_init.js';
 
+import { DISABLED_BTN_OPACITY } from './_client_init.js';
 import { initRoomHostViewHTML, updateRoomInfoContainerHTML, updateStartGameOpacityHTML } from './_client_room_html.js';
 
 // -----------------------------
@@ -119,7 +120,7 @@ function updateButtonStates() {
     const username = usernameInput.value.trim();
     const roomcode = roomcodeInput.value.trim();
     const btnEnabled_opacity = "1";
-    const btnDisabled_opacity = "0.25";
+    const btnDisabled_opacity = DISABLED_BTN_OPACITY;
 
     // Enable/disable Join Room button
     joinRoomButton.style.opacity = (username.length > 0 && roomcode.length > 0) ? btnEnabled_opacity : btnDisabled_opacity;
