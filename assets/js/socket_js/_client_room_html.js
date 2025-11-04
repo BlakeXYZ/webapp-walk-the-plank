@@ -28,6 +28,8 @@ export function initRoomHostViewHTML() {
 // UI Update - Room Info
 // -----------------------------
 export function updateRoomInfoContainerHTML(data) {
+    const username_doc_id = document.getElementById("username").value;
+    const roomcode_doc_id = document.getElementById("roomcode").value;
     const room_user_count = data.room_users.length;
     const usernames = data.room_users.map(user => user.username);
     const roomInfoContainer = document.getElementById("roomInfoContainer");
@@ -45,33 +47,37 @@ export function updateRoomInfoContainerHTML(data) {
     userListContainer.id = "userListContainer";
     userListContainer.classList.add("d-flex", "flex-column", "gap-2");
 
+    
     usernames.forEach(username => {
+        const usernameContainer = document.createElement("div");
+        usernameContainer.classList.add("bg-tertiary", "d-flex", "align-items-center", "justify-between", "p-2", "rounded");
+        
         const usernameDiv = document.createElement("div");
-        usernameDiv.classList.add("bg-tertiary", "d-flex", "align-items-center", "justify-between", "p-2", "rounded");
         usernameDiv.textContent = username;
+        usernameContainer.appendChild(usernameDiv);
+        
+        // Badges container (right aligned)
+        const badgesContainer = document.createElement("div");
+        badgesContainer.classList.add("ms-auto", "d-flex", "align-items-center", "gap-1");
+        usernameContainer.appendChild(badgesContainer);
 
         // If username == host, add host text
         if (username === data.host_username) {
             const hostBadge = document.createElement("div");
             hostBadge.textContent = "☆ Host";
-            hostBadge.classList.add("fs-8", "ms-auto");
-            usernameDiv.appendChild(hostBadge);
+            hostBadge.classList.add("fs-8");
+            badgesContainer.appendChild(hostBadge);
+        }
+        
+        // if username == current user, add (You)
+        if (username === username_doc_id) {
+            const usernameYouBadge = document.createElement("div");
+            usernameYouBadge.textContent = "(You)";
+            usernameYouBadge.classList.add("fs-8");
+            badgesContainer.appendChild(usernameYouBadge);
         }
 
-
-        // // if username == host, add special badge
-        // if (username === data.host_username) {
-        //     userSpan.classList.add("badge", "bg-warning", "px-2");
-        //     userSpan.textContent = `${username} (Host)`;
-        // } else {
-        //     userSpan.textContent = username;
-        //     userSpan.classList.add("badge", "bg-secondary", "px-2");
-        // }
-
-
-
-
-        userListContainer.appendChild(usernameDiv);
+        userListContainer.appendChild(usernameContainer);
     });
     
 
