@@ -30,10 +30,9 @@ def onClick_create_or_join_room():
     if form.validate():
         if form.join_room.data:
             session['username'] = form.username.data
-            session['roomcode'] = form.roomcode.data
         elif form.create_room.data:
             session['username'] = form.username.data
-            session['roomcode'] = build_roomcode(active_rooms)
+            form.roomcode.data = build_roomcode(active_rooms)
         else:
             return {"errors": {"submitType": ["Please select Join Room or Create Room."]}}
 

@@ -69,14 +69,17 @@ def about():
     return render_template("public/about.html", form=form)
 
 
-@blueprint.route("/room/", methods=["GET", "POST"])
-def room():
+@blueprint.route("/room/<roomcode>/", methods=["GET", "POST"])
+def room(roomcode):
     """Room page."""
     username = session.get('username')
-    roomcode = session.get('roomcode')
 
-    if not username or not roomcode:
-        flash("You must join or create a room first.", "warning")
+    if len(roomcode) != 4 or not roomcode.isalpha() or not roomcode.isupper():
+        flash("Invalid room code.", "warning")
         return redirect(url_for("public.home"))
-        
+
+    if not username:
+        flash("Please enter a valid Username.", "warning")
+        return redirect(url_for("public.home"))
+
     return render_template("public/room.html", username=username, roomcode=roomcode)

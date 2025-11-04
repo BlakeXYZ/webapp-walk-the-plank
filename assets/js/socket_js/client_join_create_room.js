@@ -84,20 +84,29 @@ sio.on("server_event_room_update", (data) => {
 // -----------------------------
 // Room Page Logic
 // -----------------------------
-if (window.location.pathname === "/room/") {
+const roomPathMatch = window.location.pathname.match(/^\/room\/([^\/]+)\/?$/);
+
+if (roomPathMatch) {
     document.addEventListener("DOMContentLoaded", async () => {
         await waitForSocketConnection();
-
+        
         const username = document.getElementById("username").value;
-        const roomcode = document.getElementById("roomcode").value;
+        // const roomcode = document.getElementById("roomcode").value;
+        const roomcode = roomPathMatch[1];
 
         log("========Attempting to join room with username:", username, "and roomcode:", roomcode);
-        
         
         const response = await clientEventJoinRoom(username, roomcode);
         if (username == response.data.host_username) {
             initRoomHostViewHTML(response.data);
             updateStartGameOpacityHTML(response.data);
+        }
+
+        // validate if roomcode exists
+        const activeRooms = await clientEventGetActiveRooms();
+        if (!activeRooms.includes(roomcode)) {
+            // Option 1: Redirect to a 404 page (if you have one)
+            window.location.href = "/404/";
         }
 
     });
@@ -182,7 +191,8 @@ if (registerForm) {
             log("Server Response:", result);
 
             if (result.success) {
-                window.location.href = "/room/";
+                let roomcode = result.payload.roomcode;
+                window.location.href = `/room/${roomcode}/`;
             } else {
                 if (result.errors.username) {
                     document.getElementById("username_error").innerText = result.errors.username.join(", ");
