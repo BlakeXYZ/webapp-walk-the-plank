@@ -2,7 +2,7 @@ import io from 'socket.io-client';
 import sio from './_client_init.js';
 
 import { clientEventGetRoomData } from './client_join_create_room.js';
-import { ROOM_USER_COUNT_TO_START_GAME } from './_constants.js';
+import { ROOM_USER_COUNT_TO_START_GAME, GAME_STATE } from './_constants.js';
 
 
 
@@ -38,6 +38,7 @@ if (hostControlsContainer) {
             payload.room_user_count_to_start_game = ROOM_USER_COUNT_TO_START_GAME;
 
             try {
+                // TODO: onClick Start Game - Random Role Assignment + Emit Assigned Role to Users
                 // ----- Send AJAX request to server -----
                 const response = await fetch('/ajax/onClick_start_game', {
                     method: 'POST',
@@ -65,10 +66,22 @@ if (hostControlsContainer) {
     log("hostControlsContainer not found.");
 }
 
+```
+// Mapping out Game Flow:
+
+- Host Clicks "Start Game" button
+
+    - Backend Logic:
+        - Validate room state (enough players, etc.)
+        - Randomly assign roles to players
+        - Emit assigned roles to users
+
+    - UI Updates:
+        - User View (Generic.. roomInfoContainer)
+        - Host View (Specific.. hostControlsContainer)
 
 
-
-
+```
 
 // // -----------------------------
 // // UI Update Functions
