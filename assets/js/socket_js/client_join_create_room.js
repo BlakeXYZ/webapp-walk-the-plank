@@ -2,7 +2,7 @@ import io from 'socket.io-client';
 import sio from './_client_init.js';
 
 import { DISABLED_BTN_OPACITY } from './_constants.js';
-import { initRoomHostViewHTML, updateRoomInfoContainerHTML, updateStartGameOpacityHTML } from './_client_room_html.js';
+import { initRoomHostViewHTML, updateStartGameOpacityHTML, updateRoomUI } from './_client_room_html.js';
 
 // -----------------------------
 // Debug Logging Utility
@@ -64,8 +64,6 @@ function clientEventJoinRoom(username, roomcode) {
             resolve(response);
         });
     });
-
-    
 }
 
 
@@ -76,7 +74,7 @@ function clientEventJoinRoom(username, roomcode) {
 // Listen for server broadcast updates
 sio.on("server_event_room_update", (data) => {
     log("📡 Room update received:", data);
-    updateRoomInfoContainerHTML(data);
+    updateRoomUI(data);
     updateStartGameOpacityHTML(data);
 });
 

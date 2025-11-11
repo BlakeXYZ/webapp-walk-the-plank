@@ -1,6 +1,7 @@
 import { ROOM_USER_COUNT_TO_START_GAME, 
         ROOM_USER_MAX_COUNT, 
-        DISABLED_BTN_OPACITY } from './_constants.js';
+        DISABLED_BTN_OPACITY,
+        GAME_STATE } from './_constants.js';
 
 /**
  * @param {Object} data - {
@@ -27,7 +28,62 @@ export function initRoomHostViewHTML() {
 // -----------------------------
 // UI Update - Room Info
 // -----------------------------
-export function updateRoomInfoContainerHTML(data) {
+
+
+
+
+
+export function updateRoomUI(data) {
+    const gameState = data.game_state 
+    const roomInfoContainer = document.getElementById("roomInfoContainer");
+    const hostControlsContainer = document.getElementById("hostControlsContainer");
+
+    // Clear previous content
+    roomInfoContainer.innerHTML = "";
+    hostControlsContainer.innerHTML = "";
+
+    // Render based on game state
+    switch (gameState) {
+        case GAME_STATE.LOBBY:
+            renderLobbyStateUI(data);
+            break;
+        case GAME_STATE.IN_PROGRESS:
+            renderInProgressStateUI(data);
+            break;
+    }
+}
+
+
+// -----------------------------
+// UI - Game State 
+// -----------------------------
+
+function renderInProgressStateUI(data) {
+
+    const roomInfoContainer = document.getElementById("roomInfoContainer");
+
+    // Game State Header
+    const gameStateHeader = document.createElement("h5");
+    gameStateHeader.textContent = `Game State: ${data.game_state.replace('_', ' ').toUpperCase()}`;
+    gameStateHeader.classList.add("fw-bold", "fs-6", "mb-3");
+    roomInfoContainer.appendChild(gameStateHeader);
+}
+
+// -----------------------------
+// UI - Lobby State
+// -----------------------------
+
+function renderLobbyStateUI(data) {
+    updateRoomInfoContainerHTML(data);
+
+    // if host:
+    if (data.host_username === document.getElementById("username").value) {
+        updateStartGameOpacityHTML(data);
+        initRoomHostViewHTML(data);
+    }
+}
+
+function updateRoomInfoContainerHTML(data) {
     const username_doc_id = document.getElementById("username").value;
     const roomcode_doc_id = document.getElementById("roomcode").value;
     const room_user_count = data.room_users.length;
@@ -83,10 +139,6 @@ export function updateRoomInfoContainerHTML(data) {
 
     roomInfoContainer.prepend(userHeader);
     roomInfoContainer.appendChild(userListContainer);
-
-
-
-
 
 }
 

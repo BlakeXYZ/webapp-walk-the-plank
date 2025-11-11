@@ -116,9 +116,14 @@ def register_socketio_events(sio):
             server_event_room_update(room)  # Notify others in the room about the update
             return {"msg": "Already connected."}
         
-        # if room not in room_DICT, set joining user as host
+        ## if room not in room_DICT:
+        # - set joining user as host
+        # - set room game state as Lobby
         if room not in room_DICT:
-            room_DICT[room] = {RoomKeys.HOST: username, RoomKeys.USERS: []}            
+            room_DICT[room] = {RoomKeys.HOST: username, RoomKeys.USERS: [], 
+                               RoomKeys.GAME_STATE: GameStates.LOBBY
+                               }  
+
 
         # Ensure room exists with base keys
         room_DICT.setdefault(room, {
@@ -158,22 +163,39 @@ def register_socketio_events(sio):
 
         return {"msg": f"Left room: {room}"}
 
+
+# ----------------------------
+#   START GAME
+# ----------------------------
+    @sio.event
+    def client_event_start_game(sid, data):
+        logger.info(f"🔧 Received client_event_start_game from {sid} with data: {data}")
+        roomcode = data["roomcode"]
+        room_data = room_DICT.get(roomcode, {})
+
+        if not room_data:
+            logger.warning(f"🚫 Room {roomcode} not found for starting game.")
+            return {"success": False, "errors": ["Room not found."]}
+
+        # Update game state to IN_PROGRESS
+        room_DICT[roomcode][RoomKeys.GAME_STATE] = GameStates.IN_PROGRESS
+
+        logger.info(f"🔧 Game started in room {roomcode} by {sid}")
+
+        server_event_room_update(roomcode)  # Notify others in the room about the update
+
+        return {"success": True}
+
+
 # ----------------------------
 #   ROOM UPDATE
 # ----------------------------
     @sio.event
     def server_event_room_update(roomcode):
-        room_data = room_DICT.get(roomcode, [])
+        room_data = room_DICT.get(roomcode, {})
 
-        # Include game state in all room updates
-        update_data = {
-            RoomKeys.HOST: room_data.get(RoomKeys.HOST),
-            RoomKeys.USERS: room_data.get(RoomKeys.USERS, []),
-            RoomKeys.GAME_STATE: room_data.get(RoomKeys.GAME_STATE, GameStates.LOBBY)
-        }
-
-        logger.info(f"🔧 Emitting room update for {roomcode}: {update_data}")
-        sio.emit('server_event_room_update', update_data, to=roomcode)
+        logger.info(f"🔧 Emitting room update for {roomcode}: {room_data}")
+        sio.emit('server_event_room_update', room_data, to=roomcode)
 
 # ----------------------------
 #   Helper Functions

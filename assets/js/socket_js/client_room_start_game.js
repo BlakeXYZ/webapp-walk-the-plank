@@ -16,7 +16,28 @@ function log(...args) {
 }
 
 
-// Now you can use it:
+
+// -----------------------------
+// Socket Communication Functions
+// -----------------------------
+function clientEventStartGame(roomcode) {
+    // Emit event to server with result (callback_function)
+    return new Promise((resolve, reject) => {
+        if (!sio.connected) return reject(new Error('Socket not connected'));
+        sio.emit('client_event_start_game', { roomcode }, (response) => {
+            log('📤 Sent client_event_start_game, server responded with:', response);
+            resolve(response);
+        });
+    });
+}
+
+
+
+
+
+// -----------------------------
+// Event Listeners
+// -----------------------------
 const hostControlsContainer = document.getElementById("hostControlsContainer");
 if (hostControlsContainer) {
     hostControlsContainer.addEventListener("click", async (e) => {
@@ -47,9 +68,11 @@ if (hostControlsContainer) {
                 });
 
                 const result = await response.json();
+                log("Server Response:", result);
 
                 if (result.success) {
-                    // window.location.href = "/room/";
+                    log("Starting game...");
+                    clientEventStartGame(roomcode);
                 } else {
                     if (result.errors) {
                         document.getElementById("startGameBtn_error").innerText = result.errors.join(", ");
@@ -65,6 +88,14 @@ if (hostControlsContainer) {
 } else {
     log("hostControlsContainer not found.");
 }
+
+
+
+
+
+
+
+
 
 ```
 // Mapping out Game Flow:
