@@ -237,7 +237,21 @@ def register_socketio_events(sio):
         """Remove a user from a room by their session ID."""
         if room in room_DICT:
             room_data = room_DICT[room]
+
+            # find matching UserKeys.USERNAME for logging
+            removed_user = next((u for u in room_data[RoomKeys.USERS] if u[UserKeys.SID] == sid), None)
+
+            # if removed_user matches host_username, assign new host
+            if removed_user and removed_user[UserKeys.USERNAME] == room_data[RoomKeys.HOST]:
+                remaining_users = [u for u in room_data[RoomKeys.USERS] if u[UserKeys.SID] != sid]
+                if remaining_users:
+                    room_DICT[room][RoomKeys.HOST] = remaining_users[0][UserKeys.USERNAME]
+                else:
+                    room_DICT[room][RoomKeys.HOST] = None  # No host if no users left
+
+            # Remove user from room
             room_DICT[room][RoomKeys.USERS] = [u for u in room_data[RoomKeys.USERS] if u[UserKeys.SID] != sid]
+
             # Remove room if "room_users" is now empty
             if not room_DICT[room][RoomKeys.USERS]:
                 del room_DICT[room]
