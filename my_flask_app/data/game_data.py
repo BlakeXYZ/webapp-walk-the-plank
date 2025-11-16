@@ -1,7 +1,7 @@
 
 
 GAME_MODE__PASSWORDS ={
-    "instructions": "INSERT INSTRUCTIONS HERE.",
+    "instructions": "<INSERT INSTRUCTIONS HERE>",
     "categories": {
         "Animals": ["Elephant", "Giraffe", "Kangaroo", "Penguin", "Dolphin"],
         "Fruits": ["Apple", "Banana", "Cherry", "Mango", "Pineapple"],
