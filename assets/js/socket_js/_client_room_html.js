@@ -157,11 +157,37 @@ function roomInfo_inProgress_HTML(data) {
     const currentUser = data.room_users.find(user => user.username === username_doc_id);
     roleAssignmentDiv.textContent = `Your Role: ${currentUser ? currentUser.role.toUpperCase() : 'N/A'}`;
     roleAssignmentDiv.classList.add("mb-3", "fs-5", "fw-semibold");
+
+    // Mode Details
+    const gameModeDiv = document.createElement("div");
+    gameModeDiv.textContent = `Game Mode: ${data.game_data.game_mode.replace('_', ' ').toUpperCase()}`;
+    gameModeDiv.classList.add("mb-2", "fs-6");
+
+    const instructionsDiv = document.createElement("div");
+    instructionsDiv.textContent = `Instructions: ${data.game_data.mode_details.instructions}`;
+    instructionsDiv.classList.add("mb-2", "fs-6");
+
+    const categoryDiv = document.createElement("div");
+    categoryDiv.textContent = `Category: ${data.game_data.mode_details.category}`;
+    categoryDiv.classList.add("mb-2", "fs-6");
+
+    const passwordDiv = document.createElement("div");
+    // TODO: find alternative to hardpathing string "IMPOSTOR"
+    if (roleAssignmentDiv.textContent.includes("IMPOSTOR")) {
+        passwordDiv.textContent = `Password: ********`;
+    } else {
+        passwordDiv.textContent = `Password: ${data.game_data.mode_details.password}`;
+    }
+    passwordDiv.classList.add("mb-2", "fs-6");
+
     
     // Append to container
     roomInfoContainer.appendChild(gameStateHeader);
     gameStateHeader.appendChild(roleAssignmentDiv);
-
+    roomInfoContainer.appendChild(gameModeDiv);
+    roomInfoContainer.appendChild(instructionsDiv);
+    roomInfoContainer.appendChild(categoryDiv);
+    roomInfoContainer.appendChild(passwordDiv);
 }
 
 // -----------------------------

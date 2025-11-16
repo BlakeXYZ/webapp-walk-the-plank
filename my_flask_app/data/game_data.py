@@ -1,4 +1,19 @@
-pirate_shouts_LIST = [
+
+
+GAME_MODE__PASSWORDS ={
+    "instructions": "INSERT INSTRUCTIONS HERE.",
+    "categories": {
+        "Animals": ["Elephant", "Giraffe", "Kangaroo", "Penguin", "Dolphin"],
+        "Fruits": ["Apple", "Banana", "Cherry", "Mango", "Pineapple"],
+        "Countries": ["Canada", "Brazil", "Germany", "Japan", "Australia"],
+        "Colors": ["Red", "Blue", "Green", "Yellow", "Purple"],
+        "Sports": ["Soccer", "Basketball", "Tennis", "Cricket", "Baseball"]
+    }
+}
+
+
+
+PIRATE_SHOUTS = [
     "Ahoy!",
     "Yarrgh!",
     "Avast ye Landlubbers!",

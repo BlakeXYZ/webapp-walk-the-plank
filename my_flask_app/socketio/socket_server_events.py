@@ -6,8 +6,8 @@ from my_flask_app import user
 import socketio
 from . import sio
 
-from my_flask_app.data.constants import RoomKeys, UserKeys, GameStates, RoleKeys
-from my_flask_app.data.game_data import pirate_shouts_LIST
+from my_flask_app.data.constants import RoomKeys, UserKeys, GameStates, GameData, RoleKeys, GameModes, ModeDetails
+from my_flask_app.data.game_data import PIRATE_SHOUTS, GAME_MODE__PASSWORDS
 
 client_count = 0
 a_count = 0
@@ -119,15 +119,20 @@ def register_socketio_events(sio):
         ## if room not in room_DICT:
         # - set joining user as host
         # - set room game state as Lobby
+        # - set game data as empty DICT
         if room not in room_DICT:
             room_DICT[room] = {RoomKeys.HOST: username, RoomKeys.USERS: [], 
-                               RoomKeys.GAME_STATE: GameStates.LOBBY
+                               RoomKeys.GAME_STATE: GameStates.LOBBY,
+                               RoomKeys.GAME_DATA: {
+                                      GameData.TIMER_SETTINGS: {},
+                                      GameData.GAME_MODE: None,
+                                      GameData.MODE_DETAILS: {}
+                                    }
                                }  
-
 
         # Ensure room exists with base keys
         room_DICT.setdefault(room, {
-            RoomKeys.USERS: []
+            RoomKeys.USERS: [],
         })
 
         # Add user to the room
@@ -179,9 +184,10 @@ def register_socketio_events(sio):
 
         # Update game state to IN_PROGRESS
         room_DICT[roomcode][RoomKeys.GAME_STATE] = GameStates.IN_PROGRESS
-       
-        # Assign roles to players
-        _assign_roles_to_players(room_DICT[roomcode])
+        up_to_date_room_data = room_DICT[roomcode]
+
+        _assign_roles_to_players(up_to_date_room_data)
+        _assign_game_data_to_room(up_to_date_room_data)
 
         logger.info(f"🔧 Game started in room {roomcode} by {sid}")
 
@@ -205,6 +211,22 @@ def register_socketio_events(sio):
         # Randomly select one impostor
         imposter_user = random.choice(users)
         imposter_user[UserKeys.ROLE] = RoleKeys.IMPOSTOR
+
+
+    def _assign_game_data_to_room(room_data):
+        # For now, just assign PASSWORDS mode with predefined data
+        room_data[RoomKeys.GAME_DATA][GameData.GAME_MODE] = GameModes.PASSWORDS
+
+        # If game mode is PASSWORDS, assign the relevant mode details
+        if room_data[RoomKeys.GAME_DATA][GameData.GAME_MODE] == GameModes.PASSWORDS:
+            instructions = GAME_MODE__PASSWORDS.get("instructions", "")
+            category = random.choice(list(GAME_MODE__PASSWORDS["categories"].keys()))
+            password = random.choice(GAME_MODE__PASSWORDS["categories"][category])
+
+            room_data[RoomKeys.GAME_DATA][GameData.MODE_DETAILS][ModeDetails.INSTRUCTIONS] = instructions
+            room_data[RoomKeys.GAME_DATA][GameData.MODE_DETAILS][ModeDetails.CATEGORY] = category
+            room_data[RoomKeys.GAME_DATA][GameData.MODE_DETAILS][ModeDetails.PASSWORD] = password
+
 
 # ----------------------------
 #   ROOM UPDATE
@@ -262,7 +284,7 @@ def register_socketio_events(sio):
             username = data["username"]
             room = data["roomcode"]
 
-            shout_message = f'{username} shouts, "{random.choice(pirate_shouts_LIST)}"'
+            shout_message = f'{username} shouts, "{random.choice(PIRATE_SHOUTS)}"'
             sio.emit('server_event_shout_msg', {'shout_message': shout_message}, to=room)
 
     
