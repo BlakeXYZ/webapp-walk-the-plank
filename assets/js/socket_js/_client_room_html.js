@@ -12,26 +12,10 @@ import { ROOM_USER_COUNT_TO_START_GAME,
 
 
 
-// -----------------------------
-// UI Init Functions
-// ----------------------------
-export function initRoomHostViewHTML() {
-    const hostControlsContainer = document.getElementById("hostControlsContainer");
-    hostControlsContainer.innerHTML = `
-        <h5 class="mt-3">Host Controls:</h5>
-        <button type="button" id="startGameBtn" class="btn btn-primary mt-2">Start Game</button>
-        <small class="text-danger" id="startGameBtn_error"></small>
-    `;
-}
-
 
 // -----------------------------
 // UI Update - Room Info
 // -----------------------------
-
-
-
-
 
 export function updateRoomUI(data) {
     const gameState = data.game_state 
@@ -45,45 +29,55 @@ export function updateRoomUI(data) {
     // Render based on game state
     switch (gameState) {
         case GAME_STATE.LOBBY:
-            renderLobbyStateUI(data);
+            render_LobbyState_UI(data);
             break;
         case GAME_STATE.IN_PROGRESS:
-            renderInProgressStateUI(data);
+            render_InProgressState_UI(data);
             break;
     }
 }
 
 
+// TODO: Better organize these UI functions
+// TODO: Better placement for IF host logic and IF imposter logic.
+//       Need to make code as clear as possible for calling unique cases per user and their game_state + game_data + if host.
+//       reference: my_flask_app\data\constants.py
+//       GAME_DATA = "game_data" # (roles, timer settings, game mode, etc.)
 // -----------------------------
-// UI - Game State 
+// UI - Game In Progress State 
 // -----------------------------
 
-function renderInProgressStateUI(data) {
+function render_InProgressState_UI(data) {
 
-    const roomInfoContainer = document.getElementById("roomInfoContainer");
+    roomInfo_inProgress_HTML(data);
 
-    // Game State Header
-    const gameStateHeader = document.createElement("h5");
-    gameStateHeader.textContent = `Game State: ${data.game_state.replace('_', ' ').toUpperCase()}`;
-    gameStateHeader.classList.add("fw-bold", "fs-6", "mb-3");
-    roomInfoContainer.appendChild(gameStateHeader);
+    // if host:
+    if (data.host_username === document.getElementById("username").value) {
+        hostControls_inProgress_HTML(data);
+    }   
 }
 
 // -----------------------------
 // UI - Lobby State
 // -----------------------------
 
-function renderLobbyStateUI(data) {
-    updateRoomInfoContainerHTML(data);
+function render_LobbyState_UI(data) {
+    roomInfo_lobby_HTML(data);
 
     // if host:
     if (data.host_username === document.getElementById("username").value) {
-        updateStartGameOpacityHTML(data);
-        initRoomHostViewHTML(data);
+        hostControls_lobby_HTML(data);
     }
 }
 
-function updateRoomInfoContainerHTML(data) {
+
+
+
+// -----------------------------
+// Room Info Container HTML 
+// -----------------------------
+
+function roomInfo_lobby_HTML(data) {
     const username_doc_id = document.getElementById("username").value;
     const roomcode_doc_id = document.getElementById("roomcode").value;
     const room_user_count = data.room_users.length;
@@ -142,6 +136,58 @@ function updateRoomInfoContainerHTML(data) {
 
 }
 
+function roomInfo_inProgress_HTML(data) {
+    const username_doc_id = document.getElementById("username").value;
+    const roomcode_doc_id = document.getElementById("roomcode").value;
+    const room_user_count = data.room_users.length;
+    const usernames = data.room_users.map(user => user.username);
+    const roomInfoContainer = document.getElementById("roomInfoContainer");
+
+    // Clear previous content
+    roomInfoContainer.innerHTML = "";
+
+    // Game State Header
+    const gameStateHeader = document.createElement("h5");
+    gameStateHeader.textContent = `Game State: ${data.game_state.replace('_', ' ').toUpperCase()}`;
+    gameStateHeader.classList.add("fw-bold", "fs-6", "mb-3");
+
+
+    // User Role Assignment
+    const roleAssignmentDiv = document.createElement("div");
+    const currentUser = data.room_users.find(user => user.username === username_doc_id);
+    roleAssignmentDiv.textContent = `Your Role: ${currentUser ? currentUser.role.toUpperCase() : 'N/A'}`;
+    roleAssignmentDiv.classList.add("mb-3", "fs-5", "fw-semibold");
+    
+    // Append to container
+    roomInfoContainer.appendChild(gameStateHeader);
+    gameStateHeader.appendChild(roleAssignmentDiv);
+
+}
+
+// -----------------------------
+// Host Controls Container HTML
+// ----------------------------
+export function hostControls_lobby_HTML(data) {
+    const hostControlsContainer = document.getElementById("hostControlsContainer");
+    hostControlsContainer.innerHTML = `
+        <h5 class="mt-3">Host Controls:</h5>
+        <button type="button" id="startGameBtn" class="btn btn-primary mt-2">Start Game</button>
+        <small class="text-danger" id="startGameBtn_error"></small>
+    `;
+
+    updateStartGameOpacityHTML(data);
+}
+
+
+export function hostControls_inProgress_HTML(data) {
+    const hostControlsContainer = document.getElementById("hostControlsContainer");
+    hostControlsContainer.innerHTML = `
+        <h5 class="mt-3">Host Controls:</h5>
+        <button type="button" id="endGameBtn" class="btn btn-secondary mt-2">End Game</button>
+        <small class="text-danger" id="endGameBtn_error"></small>
+    `;
+}
+
 
 // -----------------------------
 // Start Game Button Opacity enable/disable Logic
@@ -156,6 +202,7 @@ export function updateStartGameOpacityHTML(data) {
         startGameBtn.style.opacity = (room_user_count < ROOM_USER_COUNT_TO_START_GAME) ? btnDisabled_opacity : btnEnabled_opacity;
     }
 }
+
 
 
 // -----------------------------

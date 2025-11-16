@@ -2,7 +2,7 @@ import io from 'socket.io-client';
 import sio from './_client_init.js';
 
 import { DISABLED_BTN_OPACITY } from './_constants.js';
-import { initRoomHostViewHTML, updateStartGameOpacityHTML, updateRoomUI } from './_client_room_html.js';
+import { hostControls_lobby_HTML, updateStartGameOpacityHTML, updateRoomUI } from './_client_room_html.js';
 
 // -----------------------------
 // Debug Logging Utility
@@ -75,7 +75,6 @@ function clientEventJoinRoom(username, roomcode) {
 sio.on("server_event_room_update", (data) => {
     log("📡 Room update received:", data);
     updateRoomUI(data);
-    updateStartGameOpacityHTML(data);
 });
 
 
@@ -95,11 +94,7 @@ if (roomPathMatch) {
         log("========Attempting to join room with username:", username, "and roomcode:", roomcode);
         
         const response = await clientEventJoinRoom(username, roomcode);
-        if (username == response.data.host_username) {
-            initRoomHostViewHTML(response.data);
-            updateStartGameOpacityHTML(response.data);
-        }
-
+ 
         // validate if roomcode exists
         const activeRooms = await clientEventGetActiveRooms();
         if (!activeRooms.includes(roomcode)) {

@@ -97,22 +97,21 @@ if (hostControlsContainer) {
 
 
 
-```
-// Mapping out Game Flow:
+// // Mapping out Game Flow:
 
-- Host Clicks "Start Game" button
+// - Host Clicks "Start Game" button
 
-    - Backend Logic:
-        - Validate room state (enough players, etc.)
-        - Randomly assign roles to players
-        - Emit assigned roles to users
+//     - Backend Logic:
+//         - Validate room state (enough players, etc.)
+//         - Randomly assign roles to players
+//         - Emit assigned roles to users
 
-    - UI Updates:
-        - User View (Generic.. roomInfoContainer)
-        - Host View (Specific.. hostControlsContainer)
+//     - UI Updates:
+//         - User View (Generic.. roomInfoContainer)
+//         - Host View (Specific.. hostControlsContainer)
 
 
-```
+
 
 // // -----------------------------
 // // UI Update Functions

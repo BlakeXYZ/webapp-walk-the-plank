@@ -6,7 +6,7 @@ from my_flask_app import user
 import socketio
 from . import sio
 
-from my_flask_app.data.constants import RoomKeys, UserKeys, GameStates
+from my_flask_app.data.constants import RoomKeys, UserKeys, GameStates, RoleKeys
 from my_flask_app.data.game_data import pirate_shouts_LIST
 
 client_count = 0
@@ -21,8 +21,8 @@ room_DICT = {
     "roomcode_ABCD": {
         "host_username": "player1",
         "room_users": [
-            {"sid": "xxx", "username": "player1"},
-            {"sid": "yyy", "username": "player2"}
+            {"sid": "xxx", "username": "player1", "role": "crewmate"},
+            {"sid": "yyy", "username": "player2", "role": "imposter"}
         ]}
         "game_state": "lobby",
         "game_data": {}
@@ -33,8 +33,8 @@ room_DICT = {
     "roomcode_ABCD": {
         RoomKeys.HOST: "player1",
         RoomKeys.USERS: [
-            {UserKeys.SID: "xxx", UserKeys.USERNAME: "player1"},
-            {UserKeys.SID: "yyy", UserKeys.USERNAME: "player2"}
+            {UserKeys.SID: "xxx", UserKeys.USERNAME: "player1", UserKeys.ROLE: RoleKeys.CREWMATE},
+            {UserKeys.SID: "yyy", UserKeys.USERNAME: "player2", UserKeys.ROLE: RoleKeys.IMPOSTER}
         ]}
         RoomKeys.GAME_STATE: GameStates.LOBBY,
         RoomKeys.GAME_DATA: {}
@@ -161,6 +161,8 @@ def register_socketio_events(sio):
         logger.info(f"🔧 --------------- {username} ({sid}) left room: {room}")
         logger.info(f"🔧 --------------- connected room_DICT: {room_DICT}")
 
+        #TODO: if host, assign new host
+
         return {"msg": f"Left room: {room}"}
 
 
@@ -179,6 +181,9 @@ def register_socketio_events(sio):
 
         # Update game state to IN_PROGRESS
         room_DICT[roomcode][RoomKeys.GAME_STATE] = GameStates.IN_PROGRESS
+       
+        # Assign roles to players
+        _assign_roles_to_players(room_DICT[roomcode])
 
         logger.info(f"🔧 Game started in room {roomcode} by {sid}")
 
@@ -186,6 +191,22 @@ def register_socketio_events(sio):
 
         return {"success": True}
 
+
+
+# ----------------------------
+# START GAME HELPER FUNCTIONS
+# ----------------------------
+
+    def _assign_roles_to_players(room_data):
+        users = room_data.get(RoomKeys.USERS, [])
+        
+        # assign all players as crewmates initially
+        for user in users:
+            user[UserKeys.ROLE] = RoleKeys.CREWMATE
+
+        # Randomly select one impostor
+        imposter_user = random.choice(users)
+        imposter_user[UserKeys.ROLE] = RoleKeys.IMPOSTOR
 
 # ----------------------------
 #   ROOM UPDATE
