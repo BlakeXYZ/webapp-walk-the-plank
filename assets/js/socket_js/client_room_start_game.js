@@ -59,7 +59,6 @@ if (hostControlsContainer) {
             payload.room_user_count_to_start_game = ROOM_USER_COUNT_TO_START_GAME;
 
             try {
-                // TODO: onClick Start Game - Random Role Assignment + Emit Assigned Role to Users
                 // ----- Send AJAX request to server -----
                 const response = await fetch('/ajax/onClick_start_game', {
                     method: 'POST',

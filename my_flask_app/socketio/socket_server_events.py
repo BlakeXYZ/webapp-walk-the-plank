@@ -161,8 +161,6 @@ def register_socketio_events(sio):
         logger.info(f"🔧 --------------- {username} ({sid}) left room: {room}")
         logger.info(f"🔧 --------------- connected room_DICT: {room_DICT}")
 
-        #TODO: if host, assign new host
-
         return {"msg": f"Left room: {room}"}
 
 

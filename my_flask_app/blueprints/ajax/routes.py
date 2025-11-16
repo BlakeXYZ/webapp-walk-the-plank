@@ -24,9 +24,6 @@ def onClick_create_or_join_room():
 
     logger.debug(f"🛠️ DEBUG: ------------ Received AJAX data: {data}")
 
-    #TODO: from socket client lobby.js pass in DICT of socketio room data
-    # and compare against user entered roomcode to validate if room exists
-
     if form.validate():
         if form.join_room.data:
             session['username'] = form.username.data
