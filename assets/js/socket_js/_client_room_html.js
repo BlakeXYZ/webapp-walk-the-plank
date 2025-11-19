@@ -3,6 +3,8 @@ import { ROOM_USER_COUNT_TO_START_GAME,
         DISABLED_BTN_OPACITY,
         GAME_STATE } from './_constants.js';
 
+import { Modal } from 'bootstrap';
+
 /**
  * @param {Object} data - {
  *   host_username: string,
@@ -16,6 +18,7 @@ import { ROOM_USER_COUNT_TO_START_GAME,
 // -----------------------------
 // UI Update - Room Info
 // -----------------------------
+
 
 export function updateRoomUI(data) {
     const gameState = data.game_state 
@@ -34,7 +37,12 @@ export function updateRoomUI(data) {
         case GAME_STATE.IN_PROGRESS:
             render_InProgressState_UI(data);
             break;
+        case GAME_STATE.FINISHED:
+            render_LobbyState_UI(data);
+            render_FinishedState_UI(data);
+            break;
     }
+
 }
 
 
@@ -62,8 +70,9 @@ function render_InProgressState_UI(data) {
 // -----------------------------
 
 function render_LobbyState_UI(data) {
-    roomInfo_lobby_HTML(data);
 
+    roomInfo_lobby_HTML(data);
+    
     // if host:
     if (data.host_username === document.getElementById("username").value) {
         hostControls_lobby_HTML(data);
@@ -71,7 +80,50 @@ function render_LobbyState_UI(data) {
 }
 
 
+// -----------------------------
+// UI - Finished State
+// -----------------------------
 
+function render_FinishedState_UI(data) {
+    const roomInfoContainer = document.getElementById("roomInfoContainer");
+
+    // find room_user with role 'impostor'
+    const impostorUser = data.room_users.find(user => user.role === 'impostor');
+
+    //add modal
+    const modalHTML = `
+        <div class="modal fade" id="roomInfo_finished_Modal" tabindex="-1" aria-labelledby="roomInfo_finished_ModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="roomInfo_finished_ModalLabel">Round Over!</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p>The Impostor is...</p>
+                    <h3>${impostorUser ? impostorUser.username : 'Unknown'}!</h3>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    roomInfoContainer.innerHTML += modalHTML;
+
+
+    // Show modal immediately when DOM updates
+    const roomInfo_finished_Modal = document.getElementById('roomInfo_finished_Modal');
+    roomInfo_finished_Modal.addEventListener('shown.bs.modal', () => {
+        console.log('Game results modal shown');
+    });
+
+    // Auto-show the modal
+    const modal = new Modal(roomInfo_finished_Modal);
+    modal.show();
+}
 
 // -----------------------------
 // Room Info Container HTML 
@@ -143,8 +195,13 @@ function roomInfo_inProgress_HTML(data) {
     const usernames = data.room_users.map(user => user.username);
     const roomInfoContainer = document.getElementById("roomInfoContainer");
 
-    // Clear previous content
+    // Clean up previous HTML content
     roomInfoContainer.innerHTML = "";
+    // Clean up Modals
+    const existingModals = document.querySelectorAll('.modal');
+    const existingModalBackdrops = document.querySelectorAll('.modal-backdrop');
+    existingModals.forEach(modal => modal.remove());
+    existingModalBackdrops.forEach(backdrop => backdrop.remove());
 
     // Game State Header
     const gameStateHeader = document.createElement("h5");

@@ -186,6 +186,8 @@ def register_socketio_events(sio):
         room_DICT[roomcode][RoomKeys.GAME_STATE] = GameStates.IN_PROGRESS
         up_to_date_room_data = room_DICT[roomcode]
 
+        #TODO: add logic for if USER refreshes page mid-game. Issue now is that user role and game data only is applied on 'client_event_start_game' event.
+        # - could store role and game data in session?
         _assign_roles_to_players(up_to_date_room_data)
         _assign_game_data_to_room(up_to_date_room_data)
 
@@ -226,6 +228,53 @@ def register_socketio_events(sio):
             room_data[RoomKeys.GAME_DATA][GameData.MODE_DETAILS][ModeDetails.INSTRUCTIONS] = instructions
             room_data[RoomKeys.GAME_DATA][GameData.MODE_DETAILS][ModeDetails.CATEGORY] = category
             room_data[RoomKeys.GAME_DATA][GameData.MODE_DETAILS][ModeDetails.PASSWORD] = password
+
+
+# ----------------------------
+#   END GAME
+# ----------------------------
+    @sio.event
+    def client_event_end_game(sid, data):
+        logger.info(f"🔧 Received client_event_end_game from {sid} with data: {data}")
+
+        roomcode = data["roomcode"]
+        room_data = room_DICT.get(roomcode, {})
+
+        if not room_data:
+            logger.warning(f"🚫 Room {roomcode} not found for ending game.")
+            return {"success": False, "errors": ["Room not found."]}
+        
+        # Update game state to IN_PROGRESS
+        room_DICT[roomcode][RoomKeys.GAME_STATE] = GameStates.FINISHED
+        up_to_date_room_data = room_DICT[roomcode]
+
+        server_event_room_update(roomcode)  # Notify others in the room about the update
+
+        return {"success": True}
+    
+    @sio.event
+    def client_event_end_game_cleanup(sid, data):
+        logger.info(f"🔧 Received client_event_end_game_cleanup from {sid} with data: {data}")
+
+        roomcode = data["roomcode"]
+        room_data = room_DICT.get(roomcode, {})
+
+        if not room_data:
+            logger.warning(f"🚫 Room {roomcode} not found for end game cleanup.")
+            return {"success": False, "errors": ["Room not found."]}
+        
+        # Reset game state to LOBBY
+        room_DICT[roomcode][RoomKeys.GAME_STATE] = GameStates.LOBBY
+        room_DICT[roomcode][RoomKeys.GAME_DATA] = {
+            GameData.TIMER_SETTINGS: {},                    # TODO: could persist timer settings between games
+            GameData.GAME_MODE: None,
+            GameData.MODE_DETAILS: {}
+        }
+        up_to_date_room_data = room_DICT[roomcode]
+
+        server_event_room_update(roomcode)  # Notify others in the room about the update
+
+        return {"success": True}
 
 
 # ----------------------------
