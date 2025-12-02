@@ -6,12 +6,11 @@ import io from 'socket.io-client';
 
 const sio = io({
     transports: ['polling', 'websocket'],
-    timeout: 10000,
+    timeout: 20000,
     reconnection: true,
-    reconnectionAttempts: 3,
+    reconnectionAttempts: 5,
     reconnectionDelay: 2000,
-    forceNew: true,  // Force new connection
-    autoConnect: false,
+    forceNew: false,  
 });
 
 export default sio;

@@ -30,6 +30,59 @@ function waitForSocketConnection() {
 }
 
 
+// Update your existing disconnect event handler
+sio.on('disconnect', (reason) => {
+    log('❌ Disconnected:', reason);
+    
+    // Handle different disconnect reasons
+    switch(reason) {
+        case 'io server disconnect':
+            // Server forcefully disconnected us, try to reconnect
+            log('🔄 Server disconnected us, attempting reconnect...');
+            sio.connect();
+            break;
+            
+        case 'io client disconnect':
+            // We manually disconnected, don't auto-reconnect
+            log('🛑 Manually disconnected, will not auto-reconnect');
+            break;
+            
+        case 'ping timeout':
+            // Connection lost due to ping timeout (common on mobile)
+            log('📱 Ping timeout (likely mobile), will auto-reconnect');
+            break;
+            
+        case 'transport close':
+            // Network connection lost
+            log('📶 Transport closed, will auto-reconnect');
+            break;
+            
+        case 'transport error':
+            // Network error
+            log('⚠️ Transport error, will auto-reconnect');
+            break;
+            
+        default:
+            log('❓ Unknown disconnect reason:', reason);
+    }
+});
+
+
+export function disconnectSocket() {
+    if (sio.connected) {
+        log('🔌 Manually disconnecting socket...');
+        sio.disconnect(); // This will trigger "io client disconnect" reason
+    }
+}
+
+export function reconnectSocket() {
+    if (!sio.connected) {
+        log('🔌 Manually reconnecting socket...');
+        sio.connect();
+    }
+}
+
+
 // -----------------------------
 // Socket Communication Functions
 // -----------------------------

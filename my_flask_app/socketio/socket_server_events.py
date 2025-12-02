@@ -53,18 +53,34 @@ def register_socketio_events(sio):
     
     @sio.event
     def disconnect(sid):
-        logger.info(f"🔧 disconnect handler registered for {sid}")
-
+        logger.info(f"🔧 User {sid} disconnected")
+        
+        # Find user and room
+        user_room, user_data = _find_user_by_sid(sid)
+        
+        if user_room and user_data:
+            logger.info(f"🔧 Removing {user_data[UserKeys.USERNAME]} from room {user_room}")
+            
+            # Remove user from room
+            _remove_user_from_room(user_room, sid)
+            
+            # Clean up and notify others
+            _cleanup_room_DICT()
+            server_event_room_update(user_room)
+        
+        # Remove from socket rooms
         rooms = sio.rooms(sid)
         for room in rooms:
-            if room == sid:
-                continue  # Skip individual client room
+            if room != sid:
+                sio.leave_room(sid, room)
 
-            _remove_user_from_room(room, sid)
-            sio.leave_room(sid, room)
-            _cleanup_room_DICT()
-            server_event_room_update(room)  # Notify others in the room about the update
-        
+    def _find_user_by_sid(sid):
+        """Find user and room by SID"""
+        for room, room_data in room_DICT.items():
+            for user in room_data.get(RoomKeys.USERS, []):
+                if user.get(UserKeys.SID) == sid:
+                    return room, user
+        return None, None
 # ----------------------------
 #   GET ACTIVE ROOMS
 # ----------------------------
